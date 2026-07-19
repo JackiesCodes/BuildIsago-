@@ -10,7 +10,7 @@ clients and manage status.
 1. Go to [supabase.com](https://supabase.com) and create a free account.
 2. Create a new project (pick any name/region, set a database password).
 3. In **Project Settings → API**, copy the **Project URL** and the
-   **anon public** key.
+   **publishable** key (`sb_publishable_...`).
 
 ## 2. Configure environment variables
 
@@ -18,10 +18,12 @@ clients and manage status.
 cp .env.local.example .env.local
 ```
 
-Fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` with
-the values from step 1. Both are safe to expose client-side — access
+Fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+with the values from step 1. Both are safe to expose client-side — access
 control is enforced by the Row Level Security policies below, not by
-keeping this key secret.
+keeping this key secret. Never use the **secret** key (`sb_secret_...`) here
+— that one bypasses Row Level Security and must never be shipped to the
+browser.
 
 ## 3. Set up the database
 
