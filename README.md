@@ -5,6 +5,10 @@ Client portal + internal studio dashboard, built with Next.js and Supabase
 the studio, and share files. Studio accounts see every project across all
 clients and manage status.
 
+This app lives at the repo root so it deploys with zero configuration (no
+Root Directory setting needed). The static marketing site lives in
+[`/site`](./site) and deploys separately — see the note at the bottom.
+
 ## 1. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) and create a free account.
@@ -58,10 +62,18 @@ every client's projects instead of just your own.
 
 ## 6. Deploy
 
-This is a standard Next.js app — deploy it to
-[Vercel](https://vercel.com) (recommended) or any Node host. Add the same
-two environment variables in your host's project settings.
+This is a standard Next.js app rooted at the repo root — import the repo in
+[Vercel](https://vercel.com) with the default settings (no Root Directory
+override needed) and add the same two environment variables in the
+project's settings.
 
-The marketing site at the repo root is a separate static site and deploys
-independently. Once the portal has a URL, point the marketing site's
-"Start a Project" / "Client Login" links at it.
+## 7. The marketing site
+
+The static marketing site (`index.html` + `assets/`) lives in
+[`/site`](./site) and is unrelated to this Next.js app — it doesn't get
+built or deployed by `npm run build` here. To put it online, deploy `/site`
+as its own static site (its own Vercel project with Root Directory set to
+`site`, or any static host), typically on the apex domain
+(`buildisago.com`) while this portal lives on a subdomain
+(`app.buildisago.com` or similar). Once both are live, point the marketing
+site's "Start a Project" / "Client Login" links at the portal's URL.
