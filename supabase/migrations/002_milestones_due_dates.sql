@@ -28,6 +28,7 @@ create table if not exists public.project_milestones (
 
 alter table public.project_milestones enable row level security;
 
+drop policy if exists "Participants can read project milestones" on public.project_milestones;
 create policy "Participants can read project milestones"
   on public.project_milestones for select
   using (
@@ -41,6 +42,7 @@ create policy "Participants can read project milestones"
     )
   );
 
+drop policy if exists "Participants can seed project milestones" on public.project_milestones;
 create policy "Participants can seed project milestones"
   on public.project_milestones for insert
   with check (
@@ -54,6 +56,7 @@ create policy "Participants can seed project milestones"
     )
   );
 
+drop policy if exists "Studio can update project milestones" on public.project_milestones;
 create policy "Studio can update project milestones"
   on public.project_milestones for update
   using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio'));
