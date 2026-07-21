@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusBadge from '@/components/StatusBadge';
+import PriorityBadge from '@/components/PriorityBadge';
+import DueDate from '@/components/DueDate';
 import MessageThread from '@/components/MessageThread';
 import FileUploader from '@/components/FileUploader';
+import MilestoneChecklist from '@/components/MilestoneChecklist';
 
 export default async function ClientProjectDetail({ params }) {
   const { projectId } = await params;
@@ -11,7 +14,7 @@ export default async function ClientProjectDetail({ params }) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, service_type, status, description, created_at')
+    .select('id, title, service_type, status, description, created_at, due_date, priority')
     .eq('id', projectId)
     .single();
 
@@ -43,6 +46,12 @@ export default async function ClientProjectDetail({ params }) {
     })
   );
 
+  const { data: milestones } = await supabase
+    .from('project_milestones')
+    .select('id, title, completed, position')
+    .eq('project_id', projectId)
+    .order('position', { ascending: true });
+
   return (
     <>
       <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
@@ -52,7 +61,11 @@ export default async function ClientProjectDetail({ params }) {
           <h1>{project.title}</h1>
           <p className="service-tag">{project.service_type.replace('_', ' ')}</p>
         </div>
-        <StatusBadge status={project.status} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <DueDate date={project.due_date} />
+          <PriorityBadge priority={project.priority} />
+          <StatusBadge status={project.status} />
+        </div>
       </div>
 
       <div className="detail-grid">
@@ -61,25 +74,32 @@ export default async function ClientProjectDetail({ params }) {
           <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
         </div>
 
-        <div className="card">
-          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
-          <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-            {project.description}
-          </p>
-
-          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
-          <div className="file-list">
-            {!filesWithUrls.length && (
-              <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
-            )}
-            {filesWithUrls.map((f) => (
-              <div key={f.id} className="file-row">
-                <span>{f.file_name}</span>
-                {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
-              </div>
-            ))}
+        <div>
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
+            <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable={false} />
           </div>
-          <FileUploader projectId={projectId} />
+
+          <div className="card">
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
+              {project.description}
+            </p>
+
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
+            <div className="file-list">
+              {!filesWithUrls.length && (
+                <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
+              )}
+              {filesWithUrls.map((f) => (
+                <div key={f.id} className="file-row">
+                  <span>{f.file_name}</span>
+                  {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
+                </div>
+              ))}
+            </div>
+            <FileUploader projectId={projectId} />
+          </div>
         </div>
       </div>
     </>

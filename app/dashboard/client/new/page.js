@@ -39,6 +39,10 @@ export default function NewProjectPage() {
             <label htmlFor="description">Project details</label>
             <textarea id="description" name="description" rows={5} required placeholder="Goals, timeline, anything we should know…" />
           </div>
+          <div className="field">
+            <label htmlFor="due_date">Target date (optional)</label>
+            <input id="due_date" name="due_date" type="date" />
+          </div>
           <button type="submit" className="btn btn-primary" disabled={pending}>
             {pending ? 'Submitting…' : 'Submit project'}
           </button>

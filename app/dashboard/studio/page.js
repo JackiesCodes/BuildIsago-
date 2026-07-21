@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusSelect from '@/components/StatusSelect';
+import PriorityBadge from '@/components/PriorityBadge';
+import DueDate from '@/components/DueDate';
 
 const COLUMNS = [
   { key: 'intake', label: 'Intake' },
@@ -17,13 +19,24 @@ const SERVICE_LABELS = {
   multiple: 'Multiple',
 };
 
+const PRIORITY_RANK = { urgent: 0, high: 1, normal: 2, low: 3 };
+
+function byUrgency(a, b) {
+  const rank = (PRIORITY_RANK[a.priority] ?? 2) - (PRIORITY_RANK[b.priority] ?? 2);
+  if (rank !== 0) return rank;
+  if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date);
+  if (a.due_date) return -1;
+  if (b.due_date) return 1;
+  return 0;
+}
+
 export default async function StudioDashboard() {
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, title, service_type, status, created_at, profiles(full_name, company)')
+    .select('id, title, service_type, status, created_at, due_date, priority, profiles(full_name, company)')
     .order('created_at', { ascending: false });
 
   const all = projects || [];
@@ -69,7 +82,7 @@ export default async function StudioDashboard() {
 
           <div className="kanban-board">
             {COLUMNS.map((col) => {
-              const items = all.filter((p) => p.status === col.key);
+              const items = all.filter((p) => p.status === col.key).sort(byUrgency);
               return (
                 <div className="kanban-column" key={col.key}>
                   <div className="kanban-column-head">
@@ -86,7 +99,11 @@ export default async function StudioDashboard() {
                             {p.profiles?.full_name || 'Unknown client'}
                             {p.profiles?.company ? ` · ${p.profiles.company}` : ''}
                           </span>
-                          <span className="service-tag">{SERVICE_LABELS[p.service_type] || p.service_type}</span>
+                          <div className="kanban-card-tags">
+                            <span className="service-tag">{SERVICE_LABELS[p.service_type] || p.service_type}</span>
+                            <PriorityBadge priority={p.priority} />
+                            <DueDate date={p.due_date} />
+                          </div>
                         </Link>
                         <StatusSelect projectId={p.id} status={p.status} />
                       </div>

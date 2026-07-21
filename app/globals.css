@@ -319,6 +319,96 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   text-transform: capitalize;
 }
 
+/* Priority + due date */
+.priority-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.priority-low { background: rgba(147, 169, 180, 0.15); color: var(--muted); }
+.priority-high { background: rgba(232, 180, 111, 0.18); color: #e8b46f; }
+.priority-urgent { background: rgba(239, 106, 106, 0.18); color: var(--danger); }
+
+.due-date {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted-2);
+  white-space: nowrap;
+}
+.due-date.is-overdue { color: var(--danger); font-weight: 600; }
+
+.kanban-card-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+
+/* Milestones */
+.milestone-progress-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.milestone-progress-fill {
+  height: 100%;
+  background: var(--gradient-brand);
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+.milestone-progress-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted-2);
+  margin-bottom: 16px;
+}
+.milestone-list { display: flex; flex-direction: column; gap: 10px; }
+.milestone-item { display: flex; align-items: center; gap: 12px; }
+.milestone-check {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.milestone-check:disabled { cursor: default; }
+.milestone-item.is-done .milestone-check {
+  background: var(--gradient-brand);
+  border-color: transparent;
+}
+.milestone-item.is-done .milestone-title {
+  color: var(--muted-2);
+  text-decoration: line-through;
+}
+.milestone-title { font-size: 0.9rem; }
+
+/* Studio project meta form */
+.meta-form { display: flex; gap: 16px; }
+.meta-field { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.meta-field label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-2);
+}
+.meta-field input, .meta-field select {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  font-size: 0.85rem;
+}
+
 /* Project detail */
 .detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; align-items: start; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
