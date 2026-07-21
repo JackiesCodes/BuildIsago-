@@ -236,31 +236,3 @@ if (timeline && timelineProgress) {
   window.addEventListener('scroll', updateTimeline, { passive: true });
   window.addEventListener('resize', updateTimeline);
 }
-
-// ============================================
-// Contact form (front-end only demo submit)
-// ============================================
-const contactForm = document.getElementById('contactForm');
-const formNote = document.getElementById('formNote');
-const submitBtn = document.getElementById('submitBtn');
-if (contactForm) {
-  contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!contactForm.checkValidity()) {
-      contactForm.reportValidity();
-      return;
-    }
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
-    formNote.classList.remove('success');
-    formNote.textContent = "Sending...";
-
-    setTimeout(() => {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-      formNote.textContent = "Thanks! Your message has been noted — we'll be in touch within one business day.";
-      formNote.classList.add('success');
-      contactForm.reset();
-    }, 900);
-  });
-}
