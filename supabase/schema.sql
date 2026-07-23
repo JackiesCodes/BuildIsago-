@@ -16,11 +16,29 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+-- SECURITY DEFINER so it bypasses RLS on profiles when checked from inside
+-- a profiles policy (or any policy on another table) — querying profiles
+-- directly inside its own policy causes "infinite recursion detected in
+-- policy for relation 'profiles'".
+create or replace function public.is_studio()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and role = 'studio'
+  );
+$$;
+
+grant execute on function public.is_studio() to authenticated;
+
 create policy "Profiles are viewable by owner or studio"
   on public.profiles for select
   using (
     auth.uid() = id
-    or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
+    or public.is_studio()
   );
 
 create policy "Users can update their own profile"
@@ -65,7 +83,7 @@ create policy "Clients see own projects, studio sees all"
   on public.projects for select
   using (
     client_id = auth.uid()
-    or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
+    or public.is_studio()
   );
 
 create policy "Clients can create their own projects"
@@ -74,7 +92,7 @@ create policy "Clients can create their own projects"
 
 create policy "Studio can update any project"
   on public.projects for update
-  using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio'));
+  using (public.is_studio());
 
 create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
@@ -108,10 +126,7 @@ create policy "Participants can read project messages"
     exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -122,10 +137,7 @@ create policy "Participants can send project messages"
     and exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -149,10 +161,7 @@ create policy "Participants can read project file records"
     exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -163,10 +172,7 @@ create policy "Participants can add project file records"
     and exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -186,10 +192,7 @@ create policy "Participants can read project files in storage"
     and exists (
       select 1 from public.projects pr
       where pr.id::text = (storage.foldername(name))[1]
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -200,10 +203,7 @@ create policy "Participants can upload project files to storage"
     and exists (
       select 1 from public.projects pr
       where pr.id::text = (storage.foldername(name))[1]
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -236,10 +236,7 @@ create policy "Participants can read project milestones"
     exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
@@ -249,16 +246,13 @@ create policy "Participants can seed project milestones"
     exists (
       select 1 from public.projects pr
       where pr.id = project_id
-        and (
-          pr.client_id = auth.uid()
-          or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-        )
+        and (pr.client_id = auth.uid() or public.is_studio())
     )
   );
 
 create policy "Studio can update project milestones"
   on public.project_milestones for update
-  using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio'));
+  using (public.is_studio());
 
 -- ============================================
 -- AI-generated first-draft briefs per project
@@ -275,10 +269,7 @@ begin
   if not exists (
     select 1 from public.projects pr
     where pr.id = p_project_id
-      and (
-        pr.client_id = auth.uid()
-        or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'studio')
-      )
+      and (pr.client_id = auth.uid() or public.is_studio())
   ) then
     raise exception 'not authorized';
   end if;

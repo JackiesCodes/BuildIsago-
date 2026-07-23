@@ -52,7 +52,10 @@ contents of `supabase/schema.sql`, and run it. This creates:
 If you set up the database before the milestones/due-dates or AI-draft
 features existed, run the incremental files in `supabase/migrations/` in
 order instead of re-running the whole `schema.sql` (which would error on
-policies that already exist).
+policies that already exist). If you ever hit "infinite recursion detected
+in policy for relation 'profiles'", run `supabase/migrations/004_fix_studio_policy_recursion.sql`
+— it replaces the recursive studio-role check with a `SECURITY DEFINER`
+helper function.
 
 ## 4. Install and run
 
