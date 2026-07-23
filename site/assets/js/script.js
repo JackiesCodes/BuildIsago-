@@ -27,6 +27,17 @@ backToTop.addEventListener('click', () => {
 });
 
 // ============================================
+// Theme toggle
+// ============================================
+const themeToggle = document.getElementById('themeToggle');
+if (themeToggle && window.BuildIsagoTheme) {
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    window.BuildIsagoTheme.apply(current === 'light' ? 'dark' : 'light');
+  });
+}
+
+// ============================================
 // Mobile nav toggle
 // ============================================
 const navToggle = document.getElementById('navToggle');

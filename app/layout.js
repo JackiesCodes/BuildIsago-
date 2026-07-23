@@ -6,18 +6,29 @@ export const metadata = {
   icons: { icon: '/logo-icon.png' },
 };
 
-// Runs before first paint so the page never flashes the wrong theme:
-// picks up an explicit choice from localStorage, otherwise follows the
-// OS preference. Kept tiny and inline (not next/script) so it blocks
-// rendering until the <html> attribute is set.
+// Runs before first paint so the page never flashes the wrong theme.
+// Mirrors lib/theme.js and site/index.html's boot script — same cookie
+// name/format so the preference is shared with the marketing site once
+// both are on subdomains of buildisago.com. Kept tiny and inline (not
+// next/script, no import from lib/theme.js) so it blocks rendering
+// until the <html> attribute is set, before React even loads.
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
-    var stored = localStorage.getItem('theme');
-    var theme = stored === 'light' || stored === 'dark'
-      ? stored
+    function readCookie(name) {
+      var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    var pref = readCookie('bi-theme');
+    if (pref !== 'light' && pref !== 'dark' && pref !== 'system') {
+      var legacy = localStorage.getItem('theme');
+      pref = (legacy === 'light' || legacy === 'dark') ? legacy : 'system';
+    }
+    var effective = (pref === 'light' || pref === 'dark')
+      ? pref
       : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', effective);
+    document.documentElement.setAttribute('data-theme-pref', pref);
   } catch (e) {}
 })();
 `;

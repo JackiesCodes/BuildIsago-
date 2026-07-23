@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconKanban, IconLayoutGrid, IconLogOut, IconPlus } from './icons';
+import { IconKanban, IconLayoutGrid, IconLogOut, IconPlus, IconSettings } from './icons';
 
 const NAV = {
   client: [{ href: '/dashboard/client', label: 'Projects', icon: IconLayoutGrid }],
   studio: [{ href: '/dashboard/studio', label: 'Pipeline', icon: IconKanban }],
 };
+
+const SETTINGS_ITEM = { href: '/dashboard/settings', label: 'Settings', icon: IconSettings };
 
 export default function Sidebar({ role, name, email, homeHref, signOutAction }) {
   const pathname = usePathname();
@@ -45,6 +47,19 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
               </li>
             );
           })}
+        </ul>
+
+        <span className="sidebar-nav-label">Preferences</span>
+        <ul>
+          <li>
+            <Link
+              href={SETTINGS_ITEM.href}
+              className={pathname.startsWith(SETTINGS_ITEM.href) ? 'active' : ''}
+            >
+              <IconSettings />
+              <span>{SETTINGS_ITEM.label}</span>
+            </Link>
+          </li>
         </ul>
       </nav>
 
