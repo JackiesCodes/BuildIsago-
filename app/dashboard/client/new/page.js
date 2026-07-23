@@ -2,12 +2,17 @@
 
 import { useActionState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { createProject } from '@/lib/actions/projects';
 
 const initialState = { error: null };
+const VALID_SERVICES = ['software', 'branding', 'design', 'multiple'];
 
 export default function NewProjectPage() {
   const [state, formAction, pending] = useActionState(createProject, initialState);
+  const searchParams = useSearchParams();
+  const requestedService = searchParams.get('service');
+  const defaultService = VALID_SERVICES.includes(requestedService) ? requestedService : 'software';
 
   return (
     <>
@@ -28,7 +33,7 @@ export default function NewProjectPage() {
           </div>
           <div className="field">
             <label htmlFor="service_type">Service</label>
-            <select id="service_type" name="service_type" defaultValue="software" required>
+            <select id="service_type" name="service_type" defaultValue={defaultService} required>
               <option value="software">Software Development</option>
               <option value="branding">Branding</option>
               <option value="design">Graphic Design</option>

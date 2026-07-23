@@ -30,30 +30,40 @@ function byUrgency(a, b) {
   return 0;
 }
 
-export default async function StudioDashboard() {
+export default async function StudioDashboard({ searchParams }) {
+  const { q } = await searchParams;
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
-  const { data: projects } = await supabase
+  let query = supabase
     .from('projects')
     .select('id, title, service_type, status, created_at, due_date, priority, profiles(full_name, company)')
     .order('created_at', { ascending: false });
 
+  if (q) query = query.ilike('title', `%${q}%`);
+
+  const { data: projects } = await query;
   const all = projects || [];
+  const firstName = (profile?.full_name || '').split(/\s/)[0] || 'there';
 
   return (
     <>
+      <div className="greeting">
+        <h1>Hello, {firstName}</h1>
+        <p>Here&apos;s what&apos;s moving across the studio.</p>
+      </div>
+
       <div className="page-head">
         <div>
-          <h1>Studio Pipeline</h1>
+          <h2>{q ? `Results for "${q}"` : 'Studio Pipeline'}</h2>
           <p>Every client project, across all three disciplines, at a glance.</p>
         </div>
       </div>
 
       {!all.length ? (
         <div className="empty-state">
-          <h3>No projects yet</h3>
-          <p>Client projects will show up here as soon as they&apos;re submitted.</p>
+          <h3>{q ? 'No matching projects' : 'No projects yet'}</h3>
+          <p>{q ? 'Try a different search term.' : "Client projects will show up here as soon as they're submitted."}</p>
         </div>
       ) : (
         <>
