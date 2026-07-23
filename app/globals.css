@@ -425,6 +425,24 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   color: var(--muted-2);
   margin-top: 8px;
 }
+.ai-draft-editor {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.ai-draft-editor:focus {
+  outline: none;
+  border-color: var(--teal-400);
+  box-shadow: 0 0 0 3px rgba(44, 198, 211, 0.15);
+}
+.ai-draft-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* Studio project meta form */
 .meta-form { display: flex; gap: 16px; }
