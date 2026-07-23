@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { IconSearch } from './icons';
+import ThemeToggle from './ThemeToggle';
 
 export default function TopBar({ homeHref, roleLabel }) {
   const router = useRouter();
@@ -50,7 +51,10 @@ export default function TopBar({ homeHref, roleLabel }) {
         />
         <kbd>⌘K</kbd>
       </label>
-      {roleLabel && <span className="role-pill">{roleLabel}</span>}
+      <div className="topbar-actions">
+        <ThemeToggle />
+        {roleLabel && <span className="role-pill">{roleLabel}</span>}
+      </div>
     </div>
   );
 }
