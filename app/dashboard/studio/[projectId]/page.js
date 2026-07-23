@@ -6,6 +6,7 @@ import FileUploader from '@/components/FileUploader';
 import StatusSelect from '@/components/StatusSelect';
 import ProjectMetaForm from '@/components/ProjectMetaForm';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
+import AiDraftPanel from '@/components/AiDraftPanel';
 
 export default async function StudioProjectDetail({ params }) {
   const { projectId } = await params;
@@ -14,7 +15,7 @@ export default async function StudioProjectDetail({ params }) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, service_type, status, description, created_at, due_date, priority, profiles(full_name, company)')
+    .select('id, title, service_type, status, description, created_at, due_date, priority, ai_draft, ai_draft_generated_at, profiles(full_name, company)')
     .eq('id', projectId)
     .single();
 
@@ -84,6 +85,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
             <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
+            <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
           </div>
 
           <div className="card">
