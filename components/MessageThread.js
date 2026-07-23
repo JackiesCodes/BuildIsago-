@@ -10,9 +10,11 @@ export default function MessageThread({ projectId, messages, currentUserId }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef(null);
   const threadRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     if (!pending && formRef.current) formRef.current.reset();
+    if (!pending && textareaRef.current) textareaRef.current.style.height = 'auto';
   }, [pending]);
 
   useEffect(() => {
@@ -38,7 +40,17 @@ export default function MessageThread({ projectId, messages, currentUserId }) {
       {state?.error && <div className="form-error">{state.error}</div>}
 
       <form action={formAction} ref={formRef} className="msg-form">
-        <textarea name="body" placeholder="Write a message…" rows={1} required />
+        <textarea
+          ref={textareaRef}
+          name="body"
+          placeholder="Write a message…"
+          rows={1}
+          required
+          onInput={(e) => {
+            e.target.style.height = 'auto';
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+          }}
+        />
         <button type="submit" className="btn btn-primary btn-sm" disabled={pending}>
           {pending ? 'Sending…' : 'Send'}
         </button>

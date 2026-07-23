@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { generateAiDraft, updateAiDraft } from '@/lib/actions/ai-draft';
+import { IconSparkles } from '@/components/icons';
 
 export default function AiDraftPanel({ projectId, draft, generatedAt }) {
   const router = useRouter();
@@ -95,7 +96,14 @@ export default function AiDraftPanel({ projectId, draft, generatedAt }) {
       {error && <div className="form-error" style={{ marginTop: 12 }}>{error}</div>}
 
       <div className="ai-draft-actions" style={{ marginTop: draft ? 14 : 0 }}>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={handleGenerate} disabled={pending}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={handleGenerate}
+          disabled={pending}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+        >
+          <IconSparkles />
           {pending ? 'Generating…' : draft ? 'Regenerate Draft' : 'Generate AI First Draft'}
         </button>
         {draft && (

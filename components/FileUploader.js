@@ -10,6 +10,7 @@ export default function FileUploader({ projectId }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
 
   async function handleFiles(fileList) {
     const file = fileList?.[0];
@@ -45,8 +46,20 @@ export default function FileUploader({ projectId }) {
 
   return (
     <div>
-      <label className="upload-drop">
-        {uploading ? 'Uploading…' : 'Click to upload a file'}
+      <label
+        className={`upload-drop${dragging ? ' dragging' : ''}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!uploading) setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          if (!uploading) handleFiles(e.dataTransfer.files);
+        }}
+      >
+        {uploading ? 'Uploading…' : dragging ? 'Drop to upload' : 'Click or drag a file here'}
         <input
           ref={inputRef}
           type="file"

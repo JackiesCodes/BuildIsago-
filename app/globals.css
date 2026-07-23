@@ -404,7 +404,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 /* Studio pipeline: stats + kanban */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 14px;
   margin-bottom: 32px;
 }
@@ -681,10 +681,11 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .upload-drop:hover { border-color: var(--teal-400); color: var(--ink); }
+.upload-drop.dragging { border-color: var(--teal-400); color: var(--ink); background: rgba(44, 198, 211, 0.08); }
 .upload-drop input { display: none; }
 
 @media (max-width: 1000px) {
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
   .kanban-board { grid-template-columns: 1fr 1fr; }
 }
 

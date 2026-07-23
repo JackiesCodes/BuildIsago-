@@ -4,6 +4,7 @@ import { getSessionProfile } from '@/lib/supabase/server';
 import StatusSelect from '@/components/StatusSelect';
 import PriorityBadge from '@/components/PriorityBadge';
 import DueDate from '@/components/DueDate';
+import { SERVICES, serviceLabel } from '@/lib/constants/services';
 
 const COLUMNS = [
   { key: 'intake', label: 'Intake' },
@@ -11,13 +12,6 @@ const COLUMNS = [
   { key: 'review', label: 'Review' },
   { key: 'completed', label: 'Completed' },
 ];
-
-const SERVICE_LABELS = {
-  software: 'Software Dev',
-  branding: 'Branding',
-  design: 'Graphic Design',
-  multiple: 'Multiple',
-};
 
 const PRIORITY_RANK = { urgent: 0, high: 1, normal: 2, low: 3 };
 
@@ -76,18 +70,12 @@ export default async function StudioDashboard({ searchParams }) {
               <span className="stat-tile-num">{all.filter((p) => p.status !== 'completed').length}</span>
               <span className="stat-tile-label">Active</span>
             </div>
-            <div className="stat-tile">
-              <span className="stat-tile-num">{all.filter((p) => p.service_type === 'software').length}</span>
-              <span className="stat-tile-label">Software Dev</span>
-            </div>
-            <div className="stat-tile">
-              <span className="stat-tile-num">{all.filter((p) => p.service_type === 'branding').length}</span>
-              <span className="stat-tile-label">Branding</span>
-            </div>
-            <div className="stat-tile">
-              <span className="stat-tile-num">{all.filter((p) => p.service_type === 'design').length}</span>
-              <span className="stat-tile-label">Graphic Design</span>
-            </div>
+            {SERVICES.map(({ value, shortLabel }) => (
+              <div className="stat-tile" key={value}>
+                <span className="stat-tile-num">{all.filter((p) => p.service_type === value).length}</span>
+                <span className="stat-tile-label">{shortLabel}</span>
+              </div>
+            ))}
           </div>
 
           <div className="kanban-board">
@@ -110,7 +98,7 @@ export default async function StudioDashboard({ searchParams }) {
                             {p.profiles?.company ? ` · ${p.profiles.company}` : ''}
                           </span>
                           <div className="kanban-card-tags">
-                            <span className="service-tag">{SERVICE_LABELS[p.service_type] || p.service_type}</span>
+                            <span className="service-tag">{serviceLabel(p.service_type)}</span>
                             <PriorityBadge priority={p.priority} />
                             <DueDate date={p.due_date} />
                           </div>

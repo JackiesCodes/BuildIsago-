@@ -7,6 +7,7 @@ import StatusSelect from '@/components/StatusSelect';
 import ProjectMetaForm from '@/components/ProjectMetaForm';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
+import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
   const { projectId } = await params;
@@ -64,7 +65,7 @@ export default async function StudioProjectDetail({ params }) {
             {project.profiles?.full_name}
             {project.profiles?.company ? ` · ${project.profiles.company}` : ''}
             {' · '}
-            <span className="service-tag">{project.service_type.replace('_', ' ')}</span>
+            <span className="service-tag">{serviceLabel(project.service_type)}</span>
           </p>
         </div>
         <StatusSelect projectId={project.id} status={project.status} />

@@ -2,33 +2,14 @@ import Link from 'next/link';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusBadge from '@/components/StatusBadge';
 import { IconArrowRight, IconCode, IconLayers, IconPalette, IconPenTool } from '@/components/icons';
+import { SERVICES, serviceLabel } from '@/lib/constants/services';
 
-const QUICK_START = [
-  {
-    service: 'software',
-    title: 'Software Development',
-    desc: 'Web apps, tools, and platforms built from scratch.',
-    icon: IconCode,
-  },
-  {
-    service: 'branding',
-    title: 'Branding',
-    desc: 'Identity, voice, and visual direction for your business.',
-    icon: IconPalette,
-  },
-  {
-    service: 'design',
-    title: 'Graphic Design',
-    desc: 'Standalone design work — decks, print, social, more.',
-    icon: IconPenTool,
-  },
-  {
-    service: 'multiple',
-    title: 'Full Build',
-    desc: 'Software, brand, and design together, one team.',
-    icon: IconLayers,
-  },
-];
+const SERVICE_ICONS = {
+  software: IconCode,
+  branding: IconPalette,
+  design: IconPenTool,
+  multiple: IconLayers,
+};
 
 export default async function ClientDashboard({ searchParams }) {
   const { q } = await searchParams;
@@ -54,18 +35,21 @@ export default async function ClientDashboard({ searchParams }) {
 
       {!q && (
         <div className="quick-start-grid">
-          {QUICK_START.map(({ service, title, desc, icon: Icon }) => (
-            <Link key={service} href={`/dashboard/client/new?service=${service}`} className="quick-start-card">
-              <span className="quick-start-icon">
-                <Icon />
-              </span>
-              <span className="quick-start-title">{title}</span>
-              <span className="quick-start-desc">{desc}</span>
-              <span className="quick-start-go">
-                Start <IconArrowRight />
-              </span>
-            </Link>
-          ))}
+          {SERVICES.map(({ value, label, description }) => {
+            const Icon = SERVICE_ICONS[value];
+            return (
+              <Link key={value} href={`/dashboard/client/new?service=${value}`} className="quick-start-card">
+                <span className="quick-start-icon">
+                  <Icon />
+                </span>
+                <span className="quick-start-title">{label}</span>
+                <span className="quick-start-desc">{description}</span>
+                <span className="quick-start-go">
+                  Start <IconArrowRight />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
 
@@ -91,7 +75,7 @@ export default async function ClientDashboard({ searchParams }) {
               <div>
                 <div className="title">{p.title}</div>
                 <div className="meta">
-                  <span className="service-tag">{p.service_type.replace('_', ' ')}</span>
+                  <span className="service-tag">{serviceLabel(p.service_type)}</span>
                   <span>·</span>
                   <span>{new Date(p.created_at).toLocaleDateString()}</span>
                 </div>

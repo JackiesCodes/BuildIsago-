@@ -8,9 +8,11 @@ import MessageThread from '@/components/MessageThread';
 import FileUploader from '@/components/FileUploader';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
+import { serviceLabel } from '@/lib/constants/services';
 
-export default async function ClientProjectDetail({ params }) {
+export default async function ClientProjectDetail({ params, searchParams }) {
   const { projectId } = await params;
+  const { setup } = await searchParams;
   const { user, supabase } = await getSessionProfile();
 
   const { data: project } = await supabase
@@ -57,10 +59,17 @@ export default async function ClientProjectDetail({ params }) {
     <>
       <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
 
+      {setup === 'partial' && (
+        <div className="form-error" style={{ marginBottom: 24 }}>
+          Your project was created, but we couldn&apos;t set up the milestone checklist
+          automatically. Send us a message below and we&apos;ll add it manually.
+        </div>
+      )}
+
       <div className="page-head">
         <div>
           <h1>{project.title}</h1>
-          <p className="service-tag">{project.service_type.replace('_', ' ')}</p>
+          <p className="service-tag">{serviceLabel(project.service_type)}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <DueDate date={project.due_date} />
