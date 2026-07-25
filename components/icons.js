@@ -211,3 +211,25 @@ export function IconCopyLink(props) {
     </svg>
   );
 }
+
+export function IconGitBranch(props) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="6" cy="6" r="2.5" />
+      <circle cx="6" cy="18" r="2.5" />
+      <circle cx="18" cy="9" r="2.5" />
+      <path d="M6 8.5v7" />
+      <path d="M6 8.5A5.5 5.5 0 0 0 11.5 14H16" />
+    </svg>
+  );
+}
+
+export function IconExternalLink(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M14 4h6v6" />
+      <path d="M20 4 10 14" />
+      <path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" />
+    </svg>
+  );
+}

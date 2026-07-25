@@ -43,7 +43,7 @@ In the Supabase dashboard, open **SQL Editor → New query**, paste the
 contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
-  `project_designs`, `project_brand_kits` tables
+  `project_designs`, `project_brand_kits`, `project_dev_scopes` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -51,12 +51,13 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - Due dates, priority, and AI-draft columns on `projects`
 
 If you set up the database before the milestones/due-dates, AI-draft,
-Design Studio, or Brand Studio features existed, run the incremental files
-in `supabase/migrations/` in order instead of re-running the whole
-`schema.sql` (which would error on policies that already exist). If you
-ever hit "infinite recursion detected in policy for relation 'profiles'",
-run `supabase/migrations/004_fix_studio_policy_recursion.sql` — it replaces
-the recursive studio-role check with a `SECURITY DEFINER` helper function.
+Design Studio, Brand Studio, or Dev Studio features existed, run the
+incremental files in `supabase/migrations/` in order instead of re-running
+the whole `schema.sql` (which would error on policies that already exist).
+If you ever hit "infinite recursion detected in policy for relation
+'profiles'", run `supabase/migrations/004_fix_studio_policy_recursion.sql`
+— it replaces the recursive studio-role check with a `SECURITY DEFINER`
+helper function.
 
 ## 4. Install and run
 
@@ -111,14 +112,29 @@ their own team or a print vendor. The public page is served through a
 unguessable per-kit token, so RLS never has to be opened up to anonymous
 users generally.
 
-## 9. Deploy
+## 9. Dev Studio
+
+Any project can have one technical scope — features, tech stack (with a
+rationale per choice), build phases, and risks/open questions, each an
+independently editable list. "Generate with AI" drafts all four sections
+from the project's brief using the same Claude integration as the other
+Studios. A project can also link a **public** GitHub repo (`owner/repo` or
+a full URL) to see its recent commits, open issues, and open pull requests
+live, pulled server-side from the unauthenticated GitHub REST API — no
+token is stored anywhere, so this only ever works for public repos.
+Unauthenticated GitHub requests are capped at 60/hour per IP; results are
+cached for 2 minutes to keep repeat views from hitting that limit. Private
+repo support would need a stored access token, which is a real credential-
+security decision left for later rather than bolted on here.
+
+## 10. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add all three environment variables (Supabase URL,
 Supabase publishable key, and `ANTHROPIC_API_KEY`) in the project's settings.
 
-## 10. The marketing site
+## 11. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

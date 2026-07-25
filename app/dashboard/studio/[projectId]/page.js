@@ -9,6 +9,7 @@ import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
 import BrandKitCard from '@/components/BrandKitCard';
+import DevScopeCard from '@/components/DevScopeCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
@@ -68,6 +69,12 @@ export default async function StudioProjectDetail({ params }) {
     .eq('project_id', projectId)
     .maybeSingle();
 
+  const { data: devScope } = await supabase
+    .from('project_dev_scopes')
+    .select('features, repo_owner, repo_name')
+    .eq('project_id', projectId)
+    .maybeSingle();
+
   return (
     <>
       <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
@@ -115,6 +122,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
             <DesignsList projectId={projectId} designs={designs || []} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Dev Scope</h3>
+            <DevScopeCard projectId={projectId} devHref={`/dashboard/studio/${projectId}/dev`} devScope={devScope} />
           </div>
 
           <div className="card">
