@@ -8,6 +8,7 @@ import ProjectMetaForm from '@/components/ProjectMetaForm';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
+import BrandKitCard from '@/components/BrandKitCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
@@ -61,6 +62,12 @@ export default async function StudioProjectDetail({ params }) {
     .eq('project_id', projectId)
     .order('updated_at', { ascending: false });
 
+  const { data: brandKit } = await supabase
+    .from('project_brand_kits')
+    .select('colors, heading_font, body_font, tagline')
+    .eq('project_id', projectId)
+    .maybeSingle();
+
   return (
     <>
       <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
@@ -98,6 +105,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
             <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brand Kit</h3>
+            <BrandKitCard projectId={projectId} brandHref={`/dashboard/studio/${projectId}/brand`} brandKit={brandKit} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>

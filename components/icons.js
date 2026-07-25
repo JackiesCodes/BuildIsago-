@@ -202,3 +202,12 @@ export function IconDownload(props) {
     </svg>
   );
 }
+
+export function IconCopyLink(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5" />
+      <path d="M14 11a5 5 0 0 0-7.07 0l-2.83 2.83a5 5 0 0 0 7.07 7.07l1.5-1.5" />
+    </svg>
+  );
+}

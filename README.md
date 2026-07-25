@@ -43,20 +43,20 @@ In the Supabase dashboard, open **SQL Editor → New query**, paste the
 contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
-  `project_designs` tables
+  `project_designs`, `project_brand_kits` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
 - A private `project-files` storage bucket with matching access policies
 - Due dates, priority, and AI-draft columns on `projects`
 
-If you set up the database before the milestones/due-dates, AI-draft, or
-Design Studio features existed, run the incremental files in
-`supabase/migrations/` in order instead of re-running the whole `schema.sql`
-(which would error on policies that already exist). If you ever hit
-"infinite recursion detected in policy for relation 'profiles'", run
-`supabase/migrations/004_fix_studio_policy_recursion.sql` — it replaces the
-recursive studio-role check with a `SECURITY DEFINER` helper function.
+If you set up the database before the milestones/due-dates, AI-draft,
+Design Studio, or Brand Studio features existed, run the incremental files
+in `supabase/migrations/` in order instead of re-running the whole
+`schema.sql` (which would error on policies that already exist). If you
+ever hit "infinite recursion detected in policy for relation 'profiles'",
+run `supabase/migrations/004_fix_studio_policy_recursion.sql` — it replaces
+the recursive studio-role check with a `SECURITY DEFINER` helper function.
 
 ## 4. Install and run
 
@@ -97,14 +97,28 @@ shapes/text/images, edit fill color and typography, reorder layers, and
 export to PNG or PDF. Designs are saved per-project as JSON in
 `project_designs.canvas_json`. No separate design tool required.
 
-## 8. Deploy
+## 8. Brand Studio
+
+Any project can have one brand kit — colors (with live WCAG contrast checks
+against white/black), heading/body typography from a curated Google Fonts
+list with a live preview, a tagline, and a voice/tone description. "Generate
+with AI" drafts 3 tagline options plus a voice/tone paragraph from the
+project's brief using the same Claude integration as AI drafts — no new API
+or cost surface. Every brand kit also gets a public, no-login-required
+"Brand Guidelines" page at `/brand/<share_token>` that a client can hand to
+their own team or a print vendor. The public page is served through a
+`SECURITY DEFINER` Postgres function (`get_public_brand_kit`) scoped to an
+unguessable per-kit token, so RLS never has to be opened up to anonymous
+users generally.
+
+## 9. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add all three environment variables (Supabase URL,
 Supabase publishable key, and `ANTHROPIC_API_KEY`) in the project's settings.
 
-## 9. The marketing site
+## 10. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get
