@@ -786,6 +786,138 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 .upload-drop.dragging { border-color: var(--accent-ink); color: var(--ink); background: rgba(44, 198, 211, 0.08); }
 .upload-drop input { display: none; }
 
+/* Design Studio: designs list (on project detail pages) */
+.design-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.design-card {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease;
+}
+.design-card:hover { border-color: var(--accent-ink); }
+.design-card-link { display: flex; flex-direction: column; gap: 4px; padding: 16px 14px; }
+.design-card-format { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-2); }
+.design-card-title { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+.design-card-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--muted-2);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.design-card-delete:hover { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
+.design-create-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.design-create-row select {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  font-size: 0.85rem;
+}
+
+/* Design Studio: full-screen canvas editor */
+.design-editor { min-height: 100dvh; display: flex; flex-direction: column; background: var(--bg-alt); }
+.design-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+  flex-wrap: wrap;
+}
+.design-back-link { color: var(--muted); font-size: 0.88rem; flex-shrink: 0; }
+.design-back-link:hover { color: var(--accent-ink-strong); }
+.design-title-input {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  min-width: 140px;
+}
+.design-title-input:hover, .design-title-input:focus { border-color: var(--border); outline: none; background: var(--surface); }
+
+.design-toolbar-tools { display: flex; align-items: center; gap: 4px; }
+.design-toolbar-tools button, .design-tool-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.design-toolbar-tools button:hover:not(:disabled), .design-tool-upload:hover { background: var(--surface-2); color: var(--ink); }
+.design-toolbar-tools button:disabled { opacity: 0.4; cursor: not-allowed; }
+.design-tool-upload input { display: none; }
+.design-tool-text {
+  width: auto !important;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+}
+.design-toolbar-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+
+.design-toolbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap; }
+.design-save-status { font-size: 0.78rem; color: var(--muted-2); font-family: var(--font-mono); white-space: nowrap; }
+.design-save-error { font-size: 0.78rem; color: var(--danger); }
+
+.design-body { flex: 1; display: flex; overflow: auto; }
+.design-canvas-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  overflow: auto;
+}
+.design-canvas-wrap canvas { box-shadow: 0 24px 60px -24px var(--shadow-color); }
+.design-properties {
+  width: 240px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--bg-alt);
+  padding: 20px;
+}
+.design-properties h4 { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 16px; }
+.design-properties .field label { display: block; font-size: 0.72rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-2); margin-bottom: 6px; }
+.design-properties .field input[type='color'] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  cursor: pointer;
+  padding: 3px;
+}
+.design-properties .field select,
+.design-properties .field input[type='number'] {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
 @media (max-width: 1000px) {
   .stats-row { grid-template-columns: repeat(3, 1fr); }
   .kanban-board { grid-template-columns: 1fr 1fr; }

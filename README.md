@@ -42,20 +42,21 @@ First Draft" button will show an error until it's set.
 In the Supabase dashboard, open **SQL Editor → New query**, paste the
 contents of `supabase/schema.sql`, and run it. This creates:
 
-- `profiles`, `projects`, `messages`, `project_files`, `project_milestones` tables
+- `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
+  `project_designs` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
 - A private `project-files` storage bucket with matching access policies
 - Due dates, priority, and AI-draft columns on `projects`
 
-If you set up the database before the milestones/due-dates or AI-draft
-features existed, run the incremental files in `supabase/migrations/` in
-order instead of re-running the whole `schema.sql` (which would error on
-policies that already exist). If you ever hit "infinite recursion detected
-in policy for relation 'profiles'", run `supabase/migrations/004_fix_studio_policy_recursion.sql`
-— it replaces the recursive studio-role check with a `SECURITY DEFINER`
-helper function.
+If you set up the database before the milestones/due-dates, AI-draft, or
+Design Studio features existed, run the incremental files in
+`supabase/migrations/` in order instead of re-running the whole `schema.sql`
+(which would error on policies that already exist). If you ever hit
+"infinite recursion detected in policy for relation 'profiles'", run
+`supabase/migrations/004_fix_studio_policy_recursion.sql` — it replaces the
+recursive studio-role check with a `SECURITY DEFINER` helper function.
 
 ## 4. Install and run
 
@@ -87,14 +88,23 @@ amount per generation — see [pricing](https://claude.com/pricing). To use a
 cheaper/faster model instead, change the `model` value in
 `lib/actions/ai-draft.js`.
 
-## 7. Deploy
+## 7. Design Studio
+
+Any project — client or studio side — can create design documents (social
+posts, presentation slides, flyers) right in the portal at `/design/<projectId>/<designId>`.
+It's a real canvas editor built on [Fabric.js](http://fabricjs.com/): add
+shapes/text/images, edit fill color and typography, reorder layers, and
+export to PNG or PDF. Designs are saved per-project as JSON in
+`project_designs.canvas_json`. No separate design tool required.
+
+## 8. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add all three environment variables (Supabase URL,
 Supabase publishable key, and `ANTHROPIC_API_KEY`) in the project's settings.
 
-## 8. The marketing site
+## 9. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

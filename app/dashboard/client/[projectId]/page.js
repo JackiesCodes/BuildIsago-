@@ -8,6 +8,7 @@ import MessageThread from '@/components/MessageThread';
 import FileUploader from '@/components/FileUploader';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
+import DesignsList from '@/components/DesignsList';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function ClientProjectDetail({ params, searchParams }) {
@@ -55,6 +56,12 @@ export default async function ClientProjectDetail({ params, searchParams }) {
     .eq('project_id', projectId)
     .order('position', { ascending: true });
 
+  const { data: designs } = await supabase
+    .from('project_designs')
+    .select('id, title, width, height, updated_at')
+    .eq('project_id', projectId)
+    .order('updated_at', { ascending: false });
+
   return (
     <>
       <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
@@ -93,6 +100,11 @@ export default async function ClientProjectDetail({ params, searchParams }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
             <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
+            <DesignsList projectId={projectId} designs={designs || []} />
           </div>
 
           <div className="card">
