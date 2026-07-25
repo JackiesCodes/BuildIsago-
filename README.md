@@ -43,7 +43,8 @@ In the Supabase dashboard, open **SQL Editor → New query**, paste the
 contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
-  `project_designs`, `project_brand_kits`, `project_dev_scopes` tables
+  `project_designs`, `project_brand_kits`, `project_dev_scopes`,
+  `project_references` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -51,9 +52,10 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - Due dates, priority, and AI-draft columns on `projects`
 
 If you set up the database before the milestones/due-dates, AI-draft,
-Design Studio, Brand Studio, or Dev Studio features existed, run the
-incremental files in `supabase/migrations/` in order instead of re-running
-the whole `schema.sql` (which would error on policies that already exist).
+Design Studio, Brand Studio, Dev Studio, or References features existed,
+run the incremental files in `supabase/migrations/` in order instead of
+re-running the whole `schema.sql` (which would error on policies that
+already exist).
 If you ever hit "infinite recursion detected in policy for relation
 'profiles'", run `supabase/migrations/004_fix_studio_policy_recursion.sql`
 — it replaces the recursive studio-role check with a `SECURITY DEFINER`
@@ -127,14 +129,39 @@ cached for 2 minutes to keep repeat views from hitting that limit. Private
 repo support would need a stored access token, which is a real credential-
 security decision left for later rather than bolted on here.
 
-## 10. Deploy
+## 10. References (Design Studio)
+
+Any project can hold a moodboard of reference images — paste an image URL
+(e.g. a Pinterest pin's image link) or upload a file. Pasted URLs are
+fetched **server-side** and re-hosted in the project's own storage before
+anything touches the browser, for two reasons: pixel access to a
+cross-origin image is blocked by the browser's canvas security model, and
+external URLs (especially social-media CDN links) break or expire.
+
+Two extraction features, both real:
+- **Dominant color palette** — computed client-side from actual pixel data
+  (downsample, quantize, pick the most frequent well-separated buckets) —
+  not AI, deterministic, free. One click adds any swatch to the project's
+  Brand Kit.
+- **Text detection** — reads any text visible in the image via the same
+  Claude vision call pattern used elsewhere, on demand (not automatic, to
+  control cost).
+
+What this **doesn't** do: cut a specific element (a logo, an icon, a
+person) out of a busy image as a clean, transparent, reusable asset — true
+background removal/segmentation needs a dedicated image-processing model
+that isn't part of this stack. Saved references also show up inside the
+Design Studio editor's toolbar so you can drop them onto a canvas to trace
+over.
+
+## 11. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add all three environment variables (Supabase URL,
 Supabase publishable key, and `ANTHROPIC_API_KEY`) in the project's settings.
 
-## 11. The marketing site
+## 12. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

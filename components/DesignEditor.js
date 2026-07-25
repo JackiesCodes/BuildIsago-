@@ -7,7 +7,7 @@ import { IconCircle, IconDownload, IconImage, IconSquare, IconTrash, IconType } 
 
 const FONT_FAMILIES = ['Inter', 'Space Grotesk', 'JetBrains Mono', 'Georgia', 'Arial'];
 
-export default function DesignEditor({ design, backHref }) {
+export default function DesignEditor({ design, backHref, references = [] }) {
   const canvasElRef = useRef(null);
   const fabricRef = useRef(null);
   const fabricModuleRef = useRef(null);
@@ -17,6 +17,7 @@ export default function DesignEditor({ design, backHref }) {
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(design.updated_at);
   const [error, setError] = useState(null);
+  const [showReferences, setShowReferences] = useState(false);
 
   useEffect(() => {
     let disposed = false;
@@ -132,28 +133,42 @@ export default function DesignEditor({ design, backHref }) {
     canvas.requestRenderAll();
   }, [design.width, design.height]);
 
-  const addImage = useCallback(
-    (file) => {
+  const addImageFromSrc = useCallback(
+    async (src, { crossOrigin } = {}) => {
       const fabric = fabricModuleRef.current;
       const canvas = fabricRef.current;
-      if (!fabric || !canvas || !file) return;
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const img = await fabric.FabricImage.fromURL(reader.result);
-        const scale = Math.min((design.width * 0.6) / img.width, (design.height * 0.6) / img.height, 1);
-        img.set({
-          left: design.width / 2 - (img.width * scale) / 2,
-          top: design.height / 2 - (img.height * scale) / 2,
-          scaleX: scale,
-          scaleY: scale,
-        });
-        canvas.add(img);
-        canvas.setActiveObject(img);
-        canvas.requestRenderAll();
-      };
-      reader.readAsDataURL(file);
+      if (!fabric || !canvas) return;
+      const img = await fabric.FabricImage.fromURL(src, crossOrigin ? { crossOrigin } : undefined);
+      const scale = Math.min((design.width * 0.6) / img.width, (design.height * 0.6) / img.height, 1);
+      img.set({
+        left: design.width / 2 - (img.width * scale) / 2,
+        top: design.height / 2 - (img.height * scale) / 2,
+        scaleX: scale,
+        scaleY: scale,
+      });
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.requestRenderAll();
     },
     [design.width, design.height]
+  );
+
+  const addImage = useCallback(
+    (file) => {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => addImageFromSrc(reader.result);
+      reader.readAsDataURL(file);
+    },
+    [addImageFromSrc]
+  );
+
+  const addReferenceImage = useCallback(
+    (url) => {
+      addImageFromSrc(url, { crossOrigin: 'anonymous' });
+      setShowReferences(false);
+    },
+    [addImageFromSrc]
   );
 
   const deleteSelected = useCallback(() => {
@@ -274,6 +289,32 @@ export default function DesignEditor({ design, backHref }) {
             <IconImage />
             <input type="file" accept="image/*" onChange={(e) => addImage(e.target.files?.[0])} />
           </label>
+          {references.length > 0 && (
+            <div className="design-references-wrap">
+              <button
+                type="button"
+                className="design-tool-text"
+                onClick={() => setShowReferences((v) => !v)}
+              >
+                References
+              </button>
+              {showReferences && (
+                <div className="design-references-dropdown">
+                  {references.map((ref) => (
+                    <button
+                      type="button"
+                      key={ref.id}
+                      className="design-reference-thumb"
+                      onClick={() => addReferenceImage(ref.url)}
+                      title={`Insert ${ref.title}`}
+                    >
+                      <img src={ref.url} alt={ref.title} />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <span className="design-toolbar-divider" />
           <button type="button" onClick={bringForward} disabled={!selection} className="design-tool-text">
             Forward

@@ -10,6 +10,7 @@ import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
 import BrandKitCard from '@/components/BrandKitCard';
 import DevScopeCard from '@/components/DevScopeCard';
+import ReferencesCard from '@/components/ReferencesCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
@@ -75,6 +76,11 @@ export default async function StudioProjectDetail({ params }) {
     .eq('project_id', projectId)
     .maybeSingle();
 
+  const { count: referencesCount } = await supabase
+    .from('project_references')
+    .select('id', { count: 'exact', head: true })
+    .eq('project_id', projectId);
+
   return (
     <>
       <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
@@ -122,6 +128,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
             <DesignsList projectId={projectId} designs={designs || []} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>References</h3>
+            <ReferencesCard referencesHref={`/dashboard/studio/${projectId}/references`} count={referencesCount || 0} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>
