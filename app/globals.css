@@ -33,6 +33,10 @@
   --danger-strong: #ff9d9d;
   --warning: #e8b46f;
   --shadow-color: rgba(0, 0, 0, 0.6);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 2px 10px -2px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 14px 34px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
 }
 
 :root[data-theme='light'] {
@@ -60,6 +64,10 @@
   --danger-strong: #7f1d1d;
   --warning: #92400e;
   --shadow-color: rgba(20, 40, 55, 0.14);
+
+  --shadow-xs: 0 1px 2px rgba(20, 40, 55, 0.05);
+  --shadow-sm: 0 2px 10px -2px rgba(20, 40, 55, 0.09), 0 1px 2px rgba(20, 40, 55, 0.05);
+  --shadow-md: 0 14px 34px -10px rgba(20, 40, 55, 0.16), 0 2px 8px -2px rgba(20, 40, 55, 0.07);
 }
 
 :root {
@@ -159,8 +167,13 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   padding: 13px 14px;
   background: var(--surface-2);
   color: var(--ink);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   resize: vertical;
+}
+.field input:hover:not(:disabled, :focus),
+.field textarea:hover:not(:disabled, :focus),
+.field select:hover:not(:disabled, :focus) {
+  border-color: var(--border-strong);
 }
 .field input:focus, .field textarea:focus, .field select:focus {
   outline: none;
@@ -168,6 +181,43 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   box-shadow: 0 0 0 3px rgba(44, 198, 211, 0.15);
 }
 .field-hint { font-size: 0.78rem; color: var(--muted-2); margin-top: 6px; }
+
+/* Shared hover/focus treatment for every other text-like input across the
+   app (Studio editors, meta forms, etc.) so nothing falls back to a bare
+   browser outline. */
+.meta-field input, .meta-field select,
+.status-select,
+.design-title-input,
+.devscope-repo-form input,
+.devscope-list-row input,
+.devscope-pair-row input,
+.brand-color-fields input,
+.brand-color-swatch,
+.settings-row select,
+.theme-picker-option,
+input[type='color'] {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.meta-field input:hover:not(:disabled, :focus), .meta-field select:hover:not(:disabled, :focus),
+.status-select:hover:not(:disabled, :focus),
+.devscope-repo-form input:hover:not(:disabled, :focus),
+.devscope-list-row input:hover:not(:disabled, :focus),
+.devscope-pair-row input:hover:not(:disabled, :focus),
+.brand-color-fields input:hover:not(:disabled, :focus) {
+  border-color: var(--border-strong);
+}
+.meta-field input:focus, .meta-field select:focus,
+.status-select:focus,
+.design-title-input:focus,
+.devscope-repo-form input:focus,
+.devscope-list-row input:focus,
+.devscope-pair-row input:focus,
+.brand-color-fields input:focus,
+input[type='color']:focus-visible {
+  outline: none;
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 3px rgba(44, 198, 211, 0.15);
+}
 
 .form-error {
   background: rgba(239, 106, 106, 0.1);
@@ -196,12 +246,16 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   width: 100%;
 }
 .btn-primary { background: var(--gradient-brand); color: #04141c; box-shadow: 0 12px 30px -12px rgba(44, 198, 211, 0.5); }
-.btn-primary:hover { box-shadow: 0 16px 34px -12px rgba(44, 198, 211, 0.65); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 16px 34px -12px rgba(44, 198, 211, 0.65); transform: translateY(-1px); }
+.btn-primary:active:not(:disabled) { transform: translateY(0); box-shadow: 0 8px 20px -10px rgba(44, 198, 211, 0.55); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-.btn-ghost { background: var(--surface-2); border-color: var(--border); color: var(--ink); width: auto; }
-.btn-ghost:hover { border-color: var(--accent-ink); color: var(--accent-ink-strong); }
+.btn-ghost { background: var(--surface-2); border-color: var(--border); color: var(--ink); width: auto; box-shadow: var(--shadow-xs); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--accent-ink); color: var(--accent-ink-strong); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.btn-ghost:active:not(:disabled) { transform: translateY(0); box-shadow: var(--shadow-xs); }
+.btn-ghost:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 .btn-sm { padding: 9px 16px; font-size: 0.85rem; width: auto; }
-.btn-danger { background: transparent; border-color: rgba(239, 106, 106, 0.4); color: var(--danger); width: auto; }
+.btn-danger { background: transparent; border-color: rgba(239, 106, 106, 0.4); color: var(--danger); width: auto; box-shadow: none; }
+.btn-danger:hover:not(:disabled) { background: rgba(239, 106, 106, 0.1); }
 
 /* App shell (dashboard) */
 .app-shell { min-height: 100dvh; display: grid; grid-template-columns: 264px 1fr; }
@@ -224,6 +278,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 .sidebar {
   background: var(--bg-alt);
   border-right: 1px solid var(--border);
+  box-shadow: 2px 0 16px -8px var(--shadow-color);
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -335,6 +390,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   gap: 16px;
   padding: 16px 28px;
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px -8px var(--shadow-color);
   background: var(--bg-alt);
   position: sticky;
   top: 0;
@@ -398,7 +454,8 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   border-radius: var(--radius-md);
   padding: 20px;
   overflow: hidden;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 .quick-start-card::before {
   content: '';
@@ -411,7 +468,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   opacity: 0;
   transition: opacity 0.15s ease;
 }
-.quick-start-card:hover { border-color: var(--accent-ink); transform: translateY(-2px); }
+.quick-start-card:hover { border-color: var(--accent-ink); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .quick-start-card:hover::before { opacity: 1; }
 .quick-start-icon {
   width: 38px;
@@ -441,6 +498,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 24px;
+  box-shadow: var(--shadow-sm);
 }
 .project-list { display: flex; flex-direction: column; gap: 14px; }
 .project-row {
@@ -452,9 +510,10 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 18px 22px;
-  transition: border-color 0.15s ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.project-row:hover { border-color: var(--accent-ink); }
+.project-row:hover { border-color: var(--accent-ink); transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .project-row .title { font-weight: 600; margin-bottom: 4px; }
 .project-row .meta { font-size: 0.82rem; color: var(--muted-2); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
@@ -482,7 +541,10 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
+.stat-tile:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 .stat-tile-num {
   font-family: var(--font-display);
   font-size: 1.6rem;
@@ -504,6 +566,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   border-radius: var(--radius-md);
   padding: 14px;
   min-height: 160px;
+  box-shadow: var(--shadow-xs);
 }
 .kanban-column-head {
   display: flex;
@@ -534,9 +597,10 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: border-color 0.15s ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.kanban-card:hover { border-color: var(--accent-ink); }
+.kanban-card:hover { border-color: var(--accent-ink); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .kanban-card-link { display: flex; flex-direction: column; gap: 4px; }
 .kanban-card-title { font-weight: 600; font-size: 0.92rem; }
 .kanban-card-client { font-size: 0.78rem; color: var(--muted-2); }
@@ -793,9 +857,10 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: border-color 0.15s ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.design-card:hover { border-color: var(--accent-ink); }
+.design-card:hover { border-color: var(--accent-ink); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .design-card-link { display: flex; flex-direction: column; gap: 4px; padding: 16px 14px; }
 .design-card-format { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-2); }
 .design-card-title { font-size: 0.9rem; font-weight: 600; color: var(--ink); }
@@ -931,7 +996,9 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease;
 }
+.brand-color-row:hover { border-color: var(--border-strong); }
 .brand-color-swatch {
   width: 40px;
   height: 40px;
