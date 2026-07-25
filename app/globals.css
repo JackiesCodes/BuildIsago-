@@ -1107,8 +1107,9 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 
 @media (max-width: 1000px) {
   .devscope-repo-columns { grid-template-columns: 1fr; }
-  .devscope-pair-row { flex-wrap: wrap; }
+  .devscope-pair-row { flex-wrap: wrap; align-items: flex-start; }
   .devscope-pair-a, .devscope-pair-b { flex: 1 1 100% !important; }
+  .devscope-pair-row button { margin-left: auto; }
   .stats-row { grid-template-columns: repeat(3, 1fr); }
   .kanban-board { grid-template-columns: 1fr 1fr; }
 }
@@ -1151,4 +1152,25 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   .sidebar-user-info { display: none; }
   .topbar { padding: 12px 16px; flex-wrap: wrap; }
   .topbar-search { max-width: none; }
+
+  /* Design Studio: stop the fixed-width properties panel from crushing
+     the canvas, and let the canvas scale down to fit the viewport
+     (Fabric maps pointer events off the rendered box size, not the
+     canvas attributes, so a CSS-scaled canvas stays interactive). */
+  .design-toolbar { padding: 10px 14px; gap: 8px 10px; }
+  .design-title-input { min-width: 0; flex: 1 1 auto; font-size: 0.92rem; }
+  .design-toolbar-tools { order: 3; flex-basis: 100%; }
+  .design-toolbar-right { order: 2; margin-left: auto; }
+  .design-save-status { display: none; }
+  .design-body { flex-direction: column; }
+  .design-canvas-wrap { padding: 16px; }
+  .design-canvas-wrap canvas { max-width: 100%; height: auto !important; }
+  .design-properties { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+
+  /* Brand Studio: stack each color row instead of cramming swatch,
+     name, hex, and contrast labels into one line. */
+  .brand-color-row { flex-wrap: wrap; row-gap: 10px; }
+  .brand-color-fields { order: 2; flex: 1 1 100%; }
+  .brand-color-contrast { order: 3; flex: 1 1 100%; flex-direction: row; gap: 16px; }
+  .brand-color-remove { margin-left: auto; }
 }
