@@ -99,7 +99,7 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 
 ::selection { background: var(--teal-500); color: #04121a; }
 
-.container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+.container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 32px; }
 
 /* Auth screens */
 .auth-shell {
@@ -138,9 +138,10 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 
 .auth-card h1 {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 600;
-  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
 }
 .auth-card .auth-sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 28px; }
 
@@ -260,7 +261,7 @@ input[type='color']:focus-visible {
 /* App shell (dashboard) */
 .app-shell { min-height: 100dvh; display: grid; grid-template-columns: 264px 1fr; }
 .app-body { display: flex; flex-direction: column; min-width: 0; }
-.app-main { flex: 1; padding: 28px 0 80px; }
+.app-main { flex: 1; padding: 44px 0 88px; }
 
 .role-pill {
   font-family: var(--font-mono);
@@ -438,12 +439,19 @@ input[type='color']:focus-visible {
 .theme-toggle svg { width: 17px; height: 17px; }
 
 /* Greeting */
-.greeting { margin-bottom: 28px; }
-.greeting h1 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; margin: 0 0 6px; }
-.greeting p { color: var(--muted); margin: 0; font-size: 1rem; }
+.greeting { margin-bottom: 40px; }
+.greeting h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+.greeting p { color: var(--muted); margin: 0; font-size: 1.08rem; }
 
 /* Quick-start service cards */
-.quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 8px; }
+.quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 8px; }
 .quick-start-card {
   position: relative;
   display: flex;
@@ -487,19 +495,30 @@ input[type='color']:focus-visible {
 .quick-start-go svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
 .quick-start-card:hover .quick-start-go svg { transform: translateX(3px); }
 
-.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
-.page-head h1, .page-head h2 { font-family: var(--font-display); font-size: 1.7rem; font-weight: 600; margin: 0 0 6px; }
-.page-head h2 { font-size: 1.3rem; }
-.page-head p { color: var(--muted); margin: 0; font-size: 0.95rem; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 40px; flex-wrap: wrap; }
+.page-head h1, .page-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px;
+}
+.page-head h2 { font-size: clamp(1.3rem, 2.4vw, 1.55rem); }
+.page-head p { color: var(--muted); margin: 0; font-size: 1rem; }
 
 /* Cards / lists */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 24px;
+  padding: 30px;
   box-shadow: var(--shadow-sm);
 }
+/* Section headers inside a card share one bolder baseline size instead of
+   falling back to the browser's default h3/h4 rendering — components only
+   need to set their own margin/color overrides where the layout calls
+   for it (e.g. .brand-section-head h3 below). */
+.card h3 { margin: 0 0 18px; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; }
 .project-list { display: flex; flex-direction: column; gap: 14px; }
 .project-row {
   display: flex;
@@ -547,8 +566,9 @@ input[type='color']:focus-visible {
 .stat-tile:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
 .stat-tile-num {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.85rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--accent-ink-strong);
   font-variant-numeric: tabular-nums;
 }
@@ -809,7 +829,7 @@ input[type='color']:focus-visible {
 }
 
 /* Project detail */
-.detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; align-items: start; }
+.detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px; align-items: start; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
 .back-link:hover { color: var(--accent-ink-strong); }
 
@@ -1198,6 +1218,11 @@ input[type='color']:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .container { padding: 0 20px; }
+  .app-main { padding: 32px 0 64px; }
+  .card { padding: 22px; }
+  .greeting { margin-bottom: 30px; }
+  .page-head { margin-bottom: 30px; }
   .stats-row { grid-template-columns: 1fr; }
   .kanban-board { grid-template-columns: 1fr; }
   .quick-start-grid { grid-template-columns: 1fr; }
