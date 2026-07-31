@@ -44,7 +44,7 @@ contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
-  `project_references` tables
+  `project_references`, `project_invoices` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -154,14 +154,49 @@ that isn't part of this stack. Saved references also show up inside the
 Design Studio editor's toolbar so you can drop them onto a canvas to trace
 over.
 
-## 11. Deploy
+## 11. Invoicing & Payments
+
+Studio accounts can bill any project directly from its detail page: create a
+draft invoice, add line items (description/quantity/unit price), set a tax
+rate, currency, and due date, then send it. Sending posts a message in the
+project's conversation thread and unlocks it for the client to view and pay
+— drafts are never visible to clients (enforced by Row Level Security, not
+just the UI). A studio can also mark an invoice paid manually (bank
+transfer, cash) or void it.
+
+Clients pay a sent invoice with **Pay now**, which redirects to a
+Stripe-hosted Checkout page. To wire this up:
+
+1. Run `supabase/migrations/009_invoices.sql` (or the updated `schema.sql`
+   for a fresh install) to create the `project_invoices` table.
+2. Get a Stripe account and, from the [Stripe dashboard](https://dashboard.stripe.com/apikeys),
+   copy the **secret key** into `STRIPE_SECRET_KEY`. Like `ANTHROPIC_API_KEY`,
+   this has no `NEXT_PUBLIC_` prefix and must stay server-only.
+3. Set `SUPABASE_SECRET_KEY` to the Supabase project's **secret** key
+   (Project Settings → API) — server-only, never the publishable one. This
+   is used exclusively by the Stripe webhook route below, which has no
+   user session to authenticate as and needs it to mark an invoice paid.
+4. In the Stripe dashboard, add a webhook endpoint pointing at
+   `https://<your-domain>/api/stripe/webhook` listening for
+   `checkout.session.completed`, and copy its signing secret into
+   `STRIPE_WEBHOOK_SECRET`. For local development, use the
+   [Stripe CLI](https://stripe.com/docs/stripe-cli) instead:
+   `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+
+Without these three variables, invoices can still be created, edited, and
+sent — only the "Pay now" button degrades, with a message pointing the
+client to arrange payment with the studio directly.
+
+## 12. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
-override needed) and add all three environment variables (Supabase URL,
-Supabase publishable key, and `ANTHROPIC_API_KEY`) in the project's settings.
+override needed) and add the environment variables (Supabase URL, Supabase
+publishable key, `ANTHROPIC_API_KEY`, and — if invoicing is in use —
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`) in the
+project's settings.
 
-## 12. The marketing site
+## 13. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

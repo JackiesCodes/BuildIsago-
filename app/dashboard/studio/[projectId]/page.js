@@ -11,6 +11,7 @@ import DesignsList from '@/components/DesignsList';
 import BrandKitCard from '@/components/BrandKitCard';
 import DevScopeCard from '@/components/DevScopeCard';
 import ReferencesCard from '@/components/ReferencesCard';
+import InvoicesCard from '@/components/InvoicesCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
@@ -81,6 +82,11 @@ export default async function StudioProjectDetail({ params }) {
     .select('id', { count: 'exact', head: true })
     .eq('project_id', projectId);
 
+  const { data: invoices } = await supabase
+    .from('project_invoices')
+    .select('id, status, currency, line_items, tax_rate')
+    .eq('project_id', projectId);
+
   return (
     <>
       <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
@@ -118,6 +124,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
             <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Invoices</h3>
+            <InvoicesCard invoicesHref={`/dashboard/studio/${projectId}/invoices`} invoices={invoices || []} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>
