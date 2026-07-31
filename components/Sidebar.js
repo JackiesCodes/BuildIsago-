@@ -16,6 +16,7 @@ import {
 const NAV = {
   client: [
     { href: '/dashboard/client', label: 'Projects', icon: IconLayoutGrid },
+    { href: '/dashboard/marketplace', label: 'Marketplace', icon: IconUsers },
     { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
   ],
   studio: [

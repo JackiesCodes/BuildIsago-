@@ -11,6 +11,12 @@ export default async function StudioTalentDetail({ params }) {
   const { data: talent } = await supabase.from('talent').select('*').eq('id', talentId).single();
   if (!talent) notFound();
 
+  const { data: requests } = await supabase
+    .from('talent_requests')
+    .select('id, message, status, created_at')
+    .eq('talent_id', talentId)
+    .order('created_at', { ascending: false });
+
   return (
     <>
       <Link href="/dashboard/studio/talent" className="back-link">
@@ -23,7 +29,7 @@ export default async function StudioTalentDetail({ params }) {
         </div>
       </div>
 
-      <TalentEditor talent={talent} />
+      <TalentEditor talent={talent} requests={requests || []} />
     </>
   );
 }

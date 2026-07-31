@@ -45,7 +45,7 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
   `project_references`, `project_invoices`, `project_approvals`, `products`,
-  `product_purchases`, `project_retainers`, `talent` tables
+  `product_purchases`, `project_retainers`, `talent`, `talent_requests` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -295,23 +295,60 @@ real Stripe Subscription.
 Run `supabase/migrations/012_retainers.sql` (or the updated `schema.sql`
 for a fresh install) to create the `project_retainers` table.
 
-## 16. Talent (Marketplace)
+## 16. Talent roster
 
-A private roster of freelance designers, developers, and creative talent
-the studio can pull in for extra project capacity — the "Marketplace"
-piece from the ecosystem vision, scoped down to what's actually useful
-today rather than a full self-service two-sided platform. Unlike
-everything else in this app, it's purely internal: no client ever sees
-it, there's no draft/sent lifecycle, and it doesn't add a new account
-type — just an address book at `/dashboard/studio/talent` with contact
-info, specialties, rate, and notes per person, gated entirely on
-`is_studio()`.
+The studio's own private address book of freelance designers, developers,
+and creative talent it can pull in for extra project capacity — contact
+info, specialties, rate, and private notes per person at
+`/dashboard/studio/talent`, gated entirely on `is_studio()`. This part
+never became client- or public-facing; it's exactly what section 17
+builds on top of.
 
 Run `supabase/migrations/013_talent.sql` (or the updated `schema.sql` for
 a fresh install) to create the `talent` table. No new environment
 variables.
 
-## 17. Deploy
+## 17. Marketplace
+
+Freelancers can now join the platform themselves, not just be added by
+the studio — a third account role (`talent`, alongside `client` and
+`studio`) with a public profile at `/marketplace` and a studio-brokered
+hire-request flow. This is the "closer to Upwork" version scoped to what's
+realistic without a full bidding/escrow system: no job postings, no bids,
+no payments held in escrow — someone sends an inquiry, and the talent (and
+the studio) follow up directly.
+
+- **Join**: any signed-in client (not studio) can call
+  `join_marketplace_as_talent()` to become `role = 'talent'` and get a
+  profile row, private by default. Manage it at `/dashboard/marketplace`.
+- **Public browsing**: `/marketplace` lists only profiles the talent has
+  explicitly set to public — same pattern as the Digital Products
+  storefront (the `talent` table stays locked down; two `SECURITY
+  DEFINER` functions expose an explicit safe column list, never
+  email/phone/private notes).
+- **Hire requests**: anyone signed in can message a public profile from
+  `/marketplace/<id>`. Both the talent and the studio see it (and get
+  emailed via the section 13 notifications) and can mark it contacted/
+  closed.
+- Becoming `talent` doesn't touch a client's existing project access —
+  `role` only gates which dashboard nav and marketplace-specific tables
+  someone sees; their own projects are still matched by ID, not role.
+
+**A real pre-existing security gap got fixed while building this**: the
+original `"Users can update their own profile"` policy let a signed-in
+user update *any* column on their own row, including `role` — meaning
+anyone could have called `supabase.from('profiles').update({role:
+'studio'})` directly and self-promoted, bypassing the dashboard-only
+promotion this README has always described. A trigger now blocks any
+`role` change made through the `authenticated` role (i.e. a normal app
+session) unless a trusted function explicitly authorizes it for that
+transaction — direct SQL/dashboard access is unaffected, so the studio
+promotion steps in section 5 work exactly as before.
+
+Run `supabase/migrations/014_marketplace.sql` (or the updated
+`schema.sql` for a fresh install). No new environment variables.
+
+## 18. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -321,7 +358,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 18. The marketing site
+## 19. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get
