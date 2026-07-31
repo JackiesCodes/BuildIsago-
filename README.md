@@ -200,16 +200,50 @@ the updated `schema.sql` for a fresh install) to create the
 `project_approvals` table — no new environment variables or third-party
 services are needed for this one.
 
-## 13. Deploy
+## 13. Email notifications
+
+Every event that already surfaces inside the portal also emails whoever
+needs to act on it, via [Resend](https://resend.com):
+
+- New message → the studio (all studio accounts) if a client sent it, or
+  the client if the studio sent it
+- Invoice sent → the client
+- Invoice paid → the studio
+- Approval request sent → the client
+- Approval approved or changes requested → the studio
+- New project submitted → the studio
+
+There's no per-project assignment of a specific studio member, so
+studio-directed emails go to every account with `role = 'studio'`.
+
+To turn this on:
+
+1. Get a [Resend](https://resend.com/api-keys) API key and set
+   `RESEND_API_KEY`.
+2. Make sure `SUPABASE_SECRET_KEY` is set too (see the Invoicing section
+   above) — notifications use it to look up a recipient's email address,
+   the same admin client the Stripe webhook uses.
+3. Optionally set `NOTIFICATIONS_FROM_EMAIL`. Until you verify a sending
+   domain in Resend, email can only be delivered to the address you signed
+   up to Resend with — fine for testing the flow end-to-end, but add a
+   verified domain before relying on this for real clients.
+
+Without `RESEND_API_KEY` (or `SUPABASE_SECRET_KEY`), every action above
+still works exactly as before — sending an invoice, posting a message,
+deciding an approval — the email is just silently skipped and logged
+server-side.
+
+## 14. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add the environment variables (Supabase URL, Supabase
-publishable key, `ANTHROPIC_API_KEY`, and — if invoicing is in use —
-`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`) in the
+publishable key, `ANTHROPIC_API_KEY`, and — if invoicing or notifications
+are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 14. The marketing site
+## 15. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

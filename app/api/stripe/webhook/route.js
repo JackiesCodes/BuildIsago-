@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { notifyStudio } from '@/lib/notifications';
+import { getOrigin } from '@/lib/utils/origin';
 
 // No user session ever reaches this route — Stripe calls it directly, so
 // every write here goes through the admin client (service role) rather
@@ -52,6 +54,12 @@ export async function POST(req) {
           project_id: invoice.project_id,
           sender_id: invoice.created_by,
           body: `Payment received for invoice ${invoice.invoice_number}. Thank you!`,
+        });
+
+        const origin = await getOrigin();
+        await notifyStudio({
+          subject: `Payment received — invoice ${invoice.invoice_number}`,
+          text: `Payment received for invoice ${invoice.invoice_number}.\n\nView it: ${origin}/dashboard/studio/${invoice.project_id}/invoices/${invoiceId}`,
         });
       }
     }
