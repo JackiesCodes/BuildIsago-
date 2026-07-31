@@ -13,6 +13,7 @@ import BrandKitCard from '@/components/BrandKitCard';
 import DevScopeCard from '@/components/DevScopeCard';
 import ReferencesCard from '@/components/ReferencesCard';
 import InvoicesCard from '@/components/InvoicesCard';
+import ApprovalsCard from '@/components/ApprovalsCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function ClientProjectDetail({ params, searchParams }) {
@@ -89,6 +90,12 @@ export default async function ClientProjectDetail({ params, searchParams }) {
     .eq('project_id', projectId)
     .neq('status', 'draft');
 
+  const { data: approvals } = await supabase
+    .from('project_approvals')
+    .select('id, status')
+    .eq('project_id', projectId)
+    .neq('status', 'draft');
+
   return (
     <>
       <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
@@ -132,6 +139,11 @@ export default async function ClientProjectDetail({ params, searchParams }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Invoices</h3>
             <InvoicesCard invoicesHref={`/dashboard/client/${projectId}/invoices`} invoices={invoices || []} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Approvals</h3>
+            <ApprovalsCard approvalsHref={`/dashboard/client/${projectId}/approvals`} approvals={approvals || []} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>

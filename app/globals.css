@@ -655,6 +655,11 @@ input[type='color']:focus-visible {
 .invoice-status-paid { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
 .invoice-status-void { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
 
+.approval-status-draft { background: rgba(147, 169, 180, 0.15); color: var(--muted); }
+.approval-status-pending { background: rgba(232, 180, 111, 0.15); color: var(--warning); }
+.approval-status-approved { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
+.approval-status-changes_requested { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
+
 .service-tag {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -1387,6 +1392,23 @@ input[type='color']:focus-visible {
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
+
+/* Approvals */
+.approval-decision {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.approval-decision-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-2);
+}
+.approval-feedback { margin-top: 8px; font-size: 0.9rem; color: var(--ink); white-space: pre-wrap; }
 
 @media (max-width: 1000px) {
   .devscope-repo-columns { grid-template-columns: 1fr; }

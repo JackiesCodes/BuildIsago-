@@ -44,7 +44,7 @@ contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
-  `project_references`, `project_invoices` tables
+  `project_references`, `project_invoices`, `project_approvals` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -187,7 +187,20 @@ Without these three variables, invoices can still be created, edited, and
 sent — only the "Pay now" button degrades, with a message pointing the
 client to arrange payment with the studio directly.
 
-## 12. Deploy
+## 12. Approvals
+
+Studio accounts can ask a client to sign off on something — a brief, a
+direction, a scope, optionally linked to one of the project's Design Studio
+documents — from the Approvals tab on any project. A draft stays internal
+until sent; sending posts a message in the project's conversation thread
+and unlocks it for the client. The client then approves or requests changes
+with a note, either way logged with a timestamp and also posted back into
+the conversation thread. Run `supabase/migrations/010_approvals.sql` (or
+the updated `schema.sql` for a fresh install) to create the
+`project_approvals` table — no new environment variables or third-party
+services are needed for this one.
+
+## 13. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -196,7 +209,7 @@ publishable key, `ANTHROPIC_API_KEY`, and — if invoicing is in use —
 `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SUPABASE_SECRET_KEY`) in the
 project's settings.
 
-## 13. The marketing site
+## 14. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get
