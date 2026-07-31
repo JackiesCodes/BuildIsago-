@@ -45,7 +45,8 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
   `project_references`, `project_invoices`, `project_approvals`, `products`,
-  `product_purchases`, `project_retainers`, `talent`, `talent_requests` tables
+  `product_purchases`, `project_retainers`, `talent`, `talent_requests`,
+  `courses`, `course_lessons`, `course_enrollments`, `lesson_completions` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -348,7 +349,40 @@ promotion steps in section 5 work exactly as before.
 Run `supabase/migrations/014_marketplace.sql` (or the updated
 `schema.sql` for a fresh install). No new environment variables.
 
-## 18. Deploy
+## 18. Academy
+
+BuildIsago Academy — training and skills-development courses, sold like
+Digital Products (free or paid, one-time purchase) but structured as
+ordered lessons with per-student progress tracking instead of a single
+downloadable file.
+
+- Studio builds a course at `/dashboard/studio/academy`: title, level,
+  price, cover image, description, then adds ordered lessons underneath —
+  each one a video link (YouTube/Vimeo/anything, pasted in) and/or a block
+  of text, with a duration and an optional "free preview" flag. A course
+  only shows up in the catalog once published, and publishing requires at
+  least one lesson.
+- Anyone can browse `/academy` and a course's detail page without an
+  account. Lessons flagged as a free preview are watchable right there,
+  inline, before enrolling — everything else shows locked.
+- Enrolling works exactly like buying a Digital Product: free courses are
+  granted instantly through `claim_free_course()`; paid courses go through
+  the same Stripe Checkout as section 11, no new Stripe setup needed.
+- Enrolled students learn from `/dashboard/academy`, working through
+  lessons and marking each one complete — tracked per student, per lesson,
+  and only reachable for a lesson they're actually allowed to see (their
+  own enrollment, or studio, or a free-preview lesson) via a
+  `SECURITY DEFINER` function rather than a direct table write.
+- **Deliberate scope boundary**, same idea as Marketplace's "no bidding/
+  escrow": lessons hold a pasted external video URL, not an uploaded,
+  storage-hosted video file. Real video hosting/streaming is a much bigger
+  project than "training & skills development" calls for right now. No
+  quizzes or certificates either — just lessons and progress.
+
+Run `supabase/migrations/015_academy.sql` (or the updated `schema.sql` for
+a fresh install). No new environment variables.
+
+## 19. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -358,7 +392,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 19. The marketing site
+## 20. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

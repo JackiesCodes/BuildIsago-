@@ -30,6 +30,7 @@ export async function POST(req) {
     const session = event.data.object;
     const invoiceId = session.metadata?.invoice_id;
     const productId = session.metadata?.type === 'product' ? session.metadata?.product_id : null;
+    const courseId = session.metadata?.type === 'course' ? session.metadata?.course_id : null;
     const retainerId = session.metadata?.type === 'retainer' ? session.metadata?.retainer_id : null;
     const buyerId = session.metadata?.buyer_id;
 
@@ -106,6 +107,41 @@ export async function POST(req) {
           await notifyUser(buyerId, {
             subject: `Your download: ${product.title}`,
             text: `Thanks for your purchase! Download "${product.title}" any time from your BuildIsago account.\n\n${origin}/dashboard/downloads`,
+          });
+        }
+      }
+    }
+
+    if (courseId && buyerId) {
+      const supabase = createAdminClient();
+      const { data: course } = await supabase
+        .from('courses')
+        .select('id, title, slug, created_by')
+        .eq('id', courseId)
+        .single();
+
+      if (course) {
+        // Idempotent via the unique(course_id, student_id) constraint — a
+        // retried Stripe event just no-ops the second time.
+        const { error: insertError } = await supabase.from('course_enrollments').insert({
+          course_id: courseId,
+          student_id: buyerId,
+          amount_paid: (session.amount_total || 0) / 100,
+          currency: session.currency || 'usd',
+          stripe_checkout_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent,
+          status: 'paid',
+        });
+
+        if (!insertError) {
+          const origin = await getOrigin();
+          await notifyStudio({
+            subject: `Enrollment: ${course.title}`,
+            text: `Someone enrolled in "${course.title}" for ${((session.amount_total || 0) / 100).toFixed(2)} ${(session.currency || 'usd').toUpperCase()}.`,
+          });
+          await notifyUser(buyerId, {
+            subject: `You're enrolled: ${course.title}`,
+            text: `Thanks for enrolling! Start learning any time from your BuildIsago account.\n\n${origin}/dashboard/academy/${course.id}`,
           });
         }
       }

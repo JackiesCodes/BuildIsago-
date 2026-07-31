@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   IconDownload,
+  IconGraduationCap,
   IconKanban,
   IconLayoutGrid,
   IconLogOut,
@@ -17,11 +18,13 @@ const NAV = {
   client: [
     { href: '/dashboard/client', label: 'Projects', icon: IconLayoutGrid },
     { href: '/dashboard/marketplace', label: 'Marketplace', icon: IconUsers },
+    { href: '/dashboard/academy', label: 'Academy', icon: IconGraduationCap },
     { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
   ],
   studio: [
     { href: '/dashboard/studio', label: 'Pipeline', icon: IconKanban },
     { href: '/dashboard/studio/products', label: 'Products', icon: IconShoppingBag },
+    { href: '/dashboard/studio/academy', label: 'Academy', icon: IconGraduationCap },
     { href: '/dashboard/studio/talent', label: 'Talent', icon: IconUsers },
     { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
   ],

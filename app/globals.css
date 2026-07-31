@@ -1481,6 +1481,25 @@ input[type='color']:focus-visible {
 .store-detail-price { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--accent-ink-strong); margin-bottom: 16px; }
 .store-detail-desc { color: var(--muted); line-height: 1.7; margin-bottom: 28px; white-space: pre-wrap; }
 
+.course-lesson-list { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.course-lesson-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.course-lesson-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.course-lesson-toggle svg { flex-shrink: 0; color: var(--muted-2); }
+.course-video-embed { aspect-ratio: 16 / 9; border-radius: var(--radius-sm); overflow: hidden; background: #000; }
+.course-video-embed iframe { width: 100%; height: 100%; border: none; display: block; }
+
 @media (max-width: 1000px) {
   .devscope-repo-columns { grid-template-columns: 1fr; }
   .devscope-pair-row { flex-wrap: wrap; align-items: flex-start; }

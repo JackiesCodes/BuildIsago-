@@ -253,3 +253,39 @@ export function IconExternalLink(props) {
     </svg>
   );
 }
+
+export function IconGraduationCap(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="m22 10-10-5L2 10l10 5 10-5Z" />
+      <path d="M6 12.5V17c0 1.1 2.7 3 6 3s6-1.9 6-3v-4.5" />
+      <path d="M22 10v6" />
+    </svg>
+  );
+}
+
+export function IconLock(props) {
+  return (
+    <svg {...base(props)}>
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </svg>
+  );
+}
+
+export function IconPlayCircle(props) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M10 9v6l5-3-5-3Z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconCheck(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 12.5 9.5 17 19 7" />
+    </svg>
+  );
+}
