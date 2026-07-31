@@ -660,6 +660,10 @@ input[type='color']:focus-visible {
 .approval-status-approved { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
 .approval-status-changes_requested { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
 
+.product-status-draft { background: rgba(147, 169, 180, 0.15); color: var(--muted); }
+.product-status-published { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
+.product-status-archived { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
+
 .service-tag {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -1410,6 +1414,64 @@ input[type='color']:focus-visible {
 }
 .approval-feedback { margin-top: 8px; font-size: 0.9rem; color: var(--ink); white-space: pre-wrap; }
 
+/* Digital Products storefront */
+.store-page { min-height: 100vh; background: var(--bg); }
+
+.store-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 16px -8px var(--shadow-color);
+}
+.store-header-inner { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.store-brand { display: flex; align-items: center; gap: 10px; }
+.store-brand img { width: 30px; height: 30px; border-radius: 8px; }
+.store-brand span { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+.store-brand .accent { color: var(--accent-ink-strong); }
+.store-nav { display: flex; align-items: center; gap: 18px; }
+.store-nav a:not(.btn) { font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+.store-nav a:not(.btn):hover { color: var(--ink); }
+
+.store-container { padding: 48px 0 80px; }
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+}
+.product-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.product-card:hover { border-color: var(--accent-ink); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.product-card-image { aspect-ratio: 4 / 3; background: var(--surface-2); overflow: hidden; }
+.product-card-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.product-card-placeholder { width: 100%; height: 100%; background: var(--gradient-brand); opacity: 0.18; }
+.product-card-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+.product-card-body h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; color: var(--ink); margin: 0; }
+.product-card-price { font-weight: 700; color: var(--accent-ink-strong); font-variant-numeric: tabular-nums; }
+
+.store-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; margin-top: 24px; }
+.store-detail-image {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.store-detail-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.store-detail-grid h1 { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.1rem); margin: 10px 0 14px; }
+.store-detail-price { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--accent-ink-strong); margin-bottom: 16px; }
+.store-detail-desc { color: var(--muted); line-height: 1.7; margin-bottom: 28px; white-space: pre-wrap; }
+
 @media (max-width: 1000px) {
   .devscope-repo-columns { grid-template-columns: 1fr; }
   .devscope-pair-row { flex-wrap: wrap; align-items: flex-start; }
@@ -1421,6 +1483,7 @@ input[type='color']:focus-visible {
 
 @media (max-width: 860px) {
   .detail-grid { grid-template-columns: 1fr; }
+  .store-detail-grid { grid-template-columns: 1fr; gap: 24px; }
   .app-shell { grid-template-columns: 76px 1fr; }
   .sidebar-brand span,
   .sidebar-cta span,

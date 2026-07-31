@@ -224,6 +224,15 @@ export function IconGitBranch(props) {
   );
 }
 
+export function IconShoppingBag(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M6 8h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </svg>
+  );
+}
+
 export function IconExternalLink(props) {
   return (
     <svg {...base(props)}>

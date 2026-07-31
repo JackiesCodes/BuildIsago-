@@ -44,7 +44,8 @@ contents of `supabase/schema.sql`, and run it. This creates:
 
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
-  `project_references`, `project_invoices`, `project_approvals` tables
+  `project_references`, `project_invoices`, `project_approvals`, `products`,
+  `product_purchases` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -233,7 +234,39 @@ still works exactly as before — sending an invoice, posting a message,
 deciding an approval — the email is just silently skipped and logged
 server-side.
 
-## 14. Deploy
+## 14. Digital Products storefront
+
+A public storefront (no login required to browse) at `/store` for selling
+UI kits, website templates, brand templates, and design systems — the
+"Digital Products" revenue stream, and the one part of the client-project
+portal that isn't tied to any client project.
+
+- Studio manages the catalog at `/dashboard/studio/products`: title, slug,
+  category, price (0 for a free product), a public preview image, and the
+  private downloadable file. A product only shows up in the store once
+  it's published.
+- Anyone can browse `/store` and view a product page without an account.
+  Buying (or claiming a free one) requires signing in — an unauthenticated
+  visitor is sent to `/login?next=/store/<slug>` and lands back on the
+  same page after signing in or creating an account.
+- Paid products go through the same Stripe Checkout used by invoicing —
+  no new Stripe setup needed beyond what's in section 11. Free products
+  are granted instantly through a `claim_free_product()` database
+  function, no Stripe involved.
+- Every purchase (or free claim) is emailed to the buyer and to the studio
+  via the notifications from section 13, and the file becomes downloadable
+  from `/dashboard/downloads` for any signed-in user, client or studio.
+- The downloadable file lives in a **private** storage bucket
+  (`product-files`), gated by Row Level Security on a matching paid row in
+  `product_purchases` — the same pattern `project-files` uses for project
+  membership. Preview images live in a public bucket instead, since
+  showing them off is the whole point of a storefront.
+
+Run `supabase/migrations/011_products.sql` (or the updated `schema.sql`
+for a fresh install) to set this up. No new environment variables beyond
+what invoicing and notifications already need.
+
+## 15. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -243,7 +276,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 15. The marketing site
+## 16. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

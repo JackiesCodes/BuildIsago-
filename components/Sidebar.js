@@ -2,11 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconKanban, IconLayoutGrid, IconLogOut, IconPlus, IconSettings } from './icons';
+import {
+  IconDownload,
+  IconKanban,
+  IconLayoutGrid,
+  IconLogOut,
+  IconPlus,
+  IconSettings,
+  IconShoppingBag,
+} from './icons';
 
 const NAV = {
-  client: [{ href: '/dashboard/client', label: 'Projects', icon: IconLayoutGrid }],
-  studio: [{ href: '/dashboard/studio', label: 'Pipeline', icon: IconKanban }],
+  client: [
+    { href: '/dashboard/client', label: 'Projects', icon: IconLayoutGrid },
+    { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
+  ],
+  studio: [
+    { href: '/dashboard/studio', label: 'Pipeline', icon: IconKanban },
+    { href: '/dashboard/studio/products', label: 'Products', icon: IconShoppingBag },
+    { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
+  ],
 };
 
 const SETTINGS_ITEM = { href: '/dashboard/settings', label: 'Settings', icon: IconSettings };
@@ -15,6 +30,14 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
   const initial = (name || email || '?').trim().charAt(0).toUpperCase();
+
+  // Longest matching href wins — several nav items can share a path
+  // prefix (e.g. /dashboard/studio and /dashboard/studio/products), so a
+  // plain startsWith() would light up more than one at a time.
+  const activeHref = navItems
+    .map((item) => item.href)
+    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
+    .sort((a, b) => b.length - a.length)[0];
 
   return (
     <aside className="sidebar">
@@ -36,7 +59,7 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
         <span className="sidebar-nav-label">Main</span>
         <ul>
           {navItems.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const active = item.href === activeHref;
             const Icon = item.icon;
             return (
               <li key={item.href}>

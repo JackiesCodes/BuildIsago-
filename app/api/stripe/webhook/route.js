@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { notifyStudio } from '@/lib/notifications';
+import { notifyStudio, notifyUser } from '@/lib/notifications';
 import { getOrigin } from '@/lib/utils/origin';
 
 // No user session ever reaches this route — Stripe calls it directly, so
@@ -29,6 +29,43 @@ export async function POST(req) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const invoiceId = session.metadata?.invoice_id;
+    const productId = session.metadata?.type === 'product' ? session.metadata?.product_id : null;
+    const buyerId = session.metadata?.buyer_id;
+
+    if (productId && buyerId) {
+      const supabase = createAdminClient();
+      const { data: product } = await supabase
+        .from('products')
+        .select('id, title, slug, created_by')
+        .eq('id', productId)
+        .single();
+
+      if (product) {
+        // Idempotent via the unique(product_id, buyer_id) constraint — a
+        // retried Stripe event just no-ops the second time.
+        const { error: insertError } = await supabase.from('product_purchases').insert({
+          product_id: productId,
+          buyer_id: buyerId,
+          amount_paid: (session.amount_total || 0) / 100,
+          currency: session.currency || 'usd',
+          stripe_checkout_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent,
+          status: 'paid',
+        });
+
+        if (!insertError) {
+          const origin = await getOrigin();
+          await notifyStudio({
+            subject: `Sale: ${product.title}`,
+            text: `Someone bought "${product.title}" for ${((session.amount_total || 0) / 100).toFixed(2)} ${(session.currency || 'usd').toUpperCase()}.`,
+          });
+          await notifyUser(buyerId, {
+            subject: `Your download: ${product.title}`,
+            text: `Thanks for your purchase! Download "${product.title}" any time from your BuildIsago account.\n\n${origin}/dashboard/downloads`,
+          });
+        }
+      }
+    }
 
     if (invoiceId) {
       const supabase = createAdminClient();
