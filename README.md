@@ -45,7 +45,7 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
   `project_references`, `project_invoices`, `project_approvals`, `products`,
-  `product_purchases`, `project_retainers` tables
+  `product_purchases`, `project_retainers`, `talent` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -295,7 +295,23 @@ real Stripe Subscription.
 Run `supabase/migrations/012_retainers.sql` (or the updated `schema.sql`
 for a fresh install) to create the `project_retainers` table.
 
-## 16. Deploy
+## 16. Talent (Marketplace)
+
+A private roster of freelance designers, developers, and creative talent
+the studio can pull in for extra project capacity — the "Marketplace"
+piece from the ecosystem vision, scoped down to what's actually useful
+today rather than a full self-service two-sided platform. Unlike
+everything else in this app, it's purely internal: no client ever sees
+it, there's no draft/sent lifecycle, and it doesn't add a new account
+type — just an address book at `/dashboard/studio/talent` with contact
+info, specialties, rate, and notes per person, gated entirely on
+`is_studio()`.
+
+Run `supabase/migrations/013_talent.sql` (or the updated `schema.sql` for
+a fresh install) to create the `talent` table. No new environment
+variables.
+
+## 17. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -305,7 +321,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 17. The marketing site
+## 18. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

@@ -10,6 +10,7 @@ import {
   IconPlus,
   IconSettings,
   IconShoppingBag,
+  IconUsers,
 } from './icons';
 
 const NAV = {
@@ -20,6 +21,7 @@ const NAV = {
   studio: [
     { href: '/dashboard/studio', label: 'Pipeline', icon: IconKanban },
     { href: '/dashboard/studio/products', label: 'Products', icon: IconShoppingBag },
+    { href: '/dashboard/studio/talent', label: 'Talent', icon: IconUsers },
     { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
   ],
 };
