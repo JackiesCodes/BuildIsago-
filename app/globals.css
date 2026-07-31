@@ -664,6 +664,12 @@ input[type='color']:focus-visible {
 .product-status-published { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
 .product-status-archived { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
 
+.retainer-status-draft { background: rgba(147, 169, 180, 0.15); color: var(--muted); }
+.retainer-status-pending { background: rgba(232, 180, 111, 0.15); color: var(--warning); }
+.retainer-status-active { background: rgba(111, 240, 234, 0.15); color: var(--accent-ink-strong); }
+.retainer-status-past_due { background: rgba(232, 180, 111, 0.2); color: var(--warning); }
+.retainer-status-canceled { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
+
 .service-tag {
   font-family: var(--font-mono);
   font-size: 0.72rem;

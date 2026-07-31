@@ -13,6 +13,7 @@ import DevScopeCard from '@/components/DevScopeCard';
 import ReferencesCard from '@/components/ReferencesCard';
 import InvoicesCard from '@/components/InvoicesCard';
 import ApprovalsCard from '@/components/ApprovalsCard';
+import RetainersCard from '@/components/RetainersCard';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
@@ -93,6 +94,11 @@ export default async function StudioProjectDetail({ params }) {
     .select('id, status')
     .eq('project_id', projectId);
 
+  const { data: retainers } = await supabase
+    .from('project_retainers')
+    .select('id, status, amount, currency, interval')
+    .eq('project_id', projectId);
+
   return (
     <>
       <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
@@ -140,6 +146,11 @@ export default async function StudioProjectDetail({ params }) {
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Approvals</h3>
             <ApprovalsCard approvalsHref={`/dashboard/studio/${projectId}/approvals`} approvals={approvals || []} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Retainers</h3>
+            <RetainersCard retainersHref={`/dashboard/studio/${projectId}/retainers`} retainers={retainers || []} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>

@@ -45,7 +45,7 @@ contents of `supabase/schema.sql`, and run it. This creates:
 - `profiles`, `projects`, `messages`, `project_files`, `project_milestones`,
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
   `project_references`, `project_invoices`, `project_approvals`, `products`,
-  `product_purchases` tables
+  `product_purchases`, `project_retainers` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -266,7 +266,36 @@ Run `supabase/migrations/011_products.sql` (or the updated `schema.sql`
 for a fresh install) to set this up. No new environment variables beyond
 what invoicing and notifications already need.
 
-## 15. Deploy
+## 15. Retainers (recurring billing)
+
+Recurring billing on a project — "Design Support," "Brand Management," a
+monthly "Startup Growth Package," anything billed on a schedule instead of
+once. Covers both the Retainer-Based and Subscription-Based revenue
+streams as one mechanism: a flat amount, billed monthly or yearly, via a
+real Stripe Subscription.
+
+- Studio drafts a retainer on a project (title, amount, billing interval,
+  what it covers) and sends it — same draft/sent lifecycle as invoices and
+  approvals, so a client can't see it until it's sent.
+- The client starts it with **Start this retainer**, which opens Stripe
+  Checkout in subscription mode (`mode: 'subscription'`) rather than a
+  one-time payment.
+- Status (`active`, `past_due`, `canceled`) is kept in sync by the Stripe
+  webhook listening for `customer.subscription.updated` and
+  `customer.subscription.deleted` — **you need to add these two event
+  types to the webhook endpoint from section 11**, alongside
+  `checkout.session.completed`. A failed recurring charge emails the
+  studio (`past_due`); Stripe retries automatically per its own settings.
+- Either side can cancel from the retainer page. Cancellation calls
+  Stripe's API directly and takes effect **immediately** — it does not
+  wait until the end of the current billing period.
+- No new environment variables — reuses `STRIPE_SECRET_KEY`,
+  `STRIPE_WEBHOOK_SECRET`, and `SUPABASE_SECRET_KEY` from section 11.
+
+Run `supabase/migrations/012_retainers.sql` (or the updated `schema.sql`
+for a fresh install) to create the `project_retainers` table.
+
+## 16. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -276,7 +305,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 16. The marketing site
+## 17. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get
