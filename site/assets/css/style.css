@@ -603,6 +603,78 @@ button, input, textarea, select {
 }
 
 /* ============================================
+   Positioning (Vision / Mission / Philosophy)
+   ============================================ */
+.positioning { padding: 90px 0 30px; position: relative; }
+
+.equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 52px;
+}
+.equation-term {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 13px 24px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  backdrop-filter: blur(6px);
+}
+.equation-result {
+  background: var(--gradient-brand);
+  color: #04141c;
+  border-color: transparent;
+  box-shadow: 0 14px 34px -14px rgba(44, 198, 211, 0.55);
+}
+.equation-op {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--muted-2);
+}
+.equation-eq { color: var(--accent-ink); }
+
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.pillar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  transition: border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+.pillar-card:hover { border-color: var(--accent-ink); transform: translateY(-3px); }
+.pillar-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 14px;
+}
+.pillar-card p { color: var(--muted); }
+.pillar-card-accent {
+  background: linear-gradient(135deg, rgba(44,198,211,0.1), rgba(11,139,158,0.03));
+}
+.pillar-quote {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink) !important;
+  line-height: 1.4;
+}
+
+/* ============================================
    Bento Services
    ============================================ */
 .services { padding: 120px 0; position: relative; }
@@ -614,6 +686,7 @@ button, input, textarea, select {
   gap: 22px;
 }
 .bento-wide { grid-column: span 2; }
+.bento-full { grid-column: span 3; }
 
 .bento-card {
   position: relative;
@@ -791,6 +864,69 @@ button, input, textarea, select {
 }
 
 /* ============================================
+   Tech stack
+   ============================================ */
+.stack-section { padding: 110px 0; }
+
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px 40px;
+}
+.stack-group { display: flex; flex-direction: column; gap: 14px; }
+.stack-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.stack-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.stack-chip {
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+.stack-chip:hover { border-color: var(--accent-ink); color: var(--accent-ink-strong); transform: translateY(-2px); }
+
+/* ============================================
+   Target market
+   ============================================ */
+.market {
+  padding: 110px 0;
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 18px;
+}
+.market-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 26px 22px;
+  transition: border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+.market-card:hover { border-color: var(--accent-ink); transform: translateY(-3px); }
+.market-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+.market-card p { color: var(--muted); font-size: 0.88rem; }
+
+/* ============================================
    About
    ============================================ */
 .about { padding: 120px 0; }
@@ -828,7 +964,7 @@ button, input, textarea, select {
   flex-shrink: 0;
 }
 
-.about-visual { display: flex; justify-content: center; perspective: 1200px; }
+.about-visual { display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 1200px; }
 .about-card {
   width: 100%;
   max-width: 320px;
@@ -843,6 +979,52 @@ button, input, textarea, select {
   transition: transform var(--dur-fast) var(--ease-out);
 }
 .about-card img { width: 70%; }
+
+.name-story {
+  margin-top: 22px;
+  max-width: 320px;
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.name-story strong { color: var(--ink); }
+.name-story em { font-style: normal; color: var(--accent-ink-strong); font-weight: 600; }
+
+/* ============================================
+   Ecosystem (future vision)
+   ============================================ */
+.ecosystem { padding: 110px 0; }
+
+.ecosystem-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.ecosystem-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 28px 24px;
+  transition: border-color var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+.ecosystem-card:hover { border-color: var(--accent-ink); transform: translateY(-3px); }
+.ecosystem-num {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-ink);
+  margin-bottom: 14px;
+}
+.ecosystem-card h4 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.ecosystem-card p { color: var(--muted); font-size: 0.9rem; }
 
 /* ============================================
    CTA
@@ -1111,9 +1293,11 @@ button, input, textarea, select {
   .hero-inner { grid-template-columns: 1fr; }
   .hero-visual { max-width: 480px; margin: 0 auto; }
   .bento-grid { grid-template-columns: repeat(2, 1fr); }
-  .bento-wide { grid-column: span 2; }
+  .bento-wide, .bento-full { grid-column: span 2; }
   .about-inner, .contact-inner { grid-template-columns: 1fr; }
   .about-visual { order: -1; }
+  .pillar-grid { grid-template-columns: 1fr; }
+  .stack-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
@@ -1143,9 +1327,12 @@ button, input, textarea, select {
   .hero { padding: 150px 0 80px; }
   .hero-stats { gap: 28px; }
   .bento-grid { grid-template-columns: 1fr; }
-  .bento-wide { grid-column: span 1; }
+  .bento-wide, .bento-full { grid-column: span 1; }
   .form-row { grid-template-columns: 1fr; }
   .timeline { padding-left: 24px; }
   .cta-card { padding: 48px 24px; }
   .back-to-top { bottom: 20px; right: 20px; }
+  .equation { gap: 10px; }
+  .equation-term { padding: 10px 16px; font-size: 0.95rem; }
+  .stack-grid { grid-template-columns: 1fr; }
 }
