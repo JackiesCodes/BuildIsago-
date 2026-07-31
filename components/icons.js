@@ -289,3 +289,14 @@ export function IconCheck(props) {
     </svg>
   );
 }
+
+export function IconRocket(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z" />
+      <path d="M12 15c3.5-1 6-4.5 6.5-9.5C13.5 6 10 8.5 9 12l3 3Z" />
+      <path d="M9 12H4s.55-2.23 2-3c1.62-.87 4 0 4 0" />
+      <path d="M12 15v5s2.23-.55 3-2c.87-1.62 0-4 0-4" />
+    </svg>
+  );
+}

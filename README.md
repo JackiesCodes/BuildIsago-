@@ -46,7 +46,8 @@ contents of `supabase/schema.sql`, and run it. This creates:
   `project_designs`, `project_brand_kits`, `project_dev_scopes`,
   `project_references`, `project_invoices`, `project_approvals`, `products`,
   `product_purchases`, `project_retainers`, `talent`, `talent_requests`,
-  `courses`, `course_lessons`, `course_enrollments`, `lesson_completions` tables
+  `courses`, `course_lessons`, `course_enrollments`, `lesson_completions`,
+  `ventures`, `venture_applications` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -382,7 +383,41 @@ downloadable file.
 Run `supabase/migrations/015_academy.sql` (or the updated `schema.sql` for
 a fresh install). No new environment variables.
 
-## 19. Deploy
+## 19. Ventures
+
+BuildIsago Ventures — the studio's own portfolio of startups it's
+incubating or has invested in, a public showcase at `/ventures`, and an
+inbound "pitch us your startup" intake from founders.
+
+- Studio tracks each venture at `/dashboard/studio/ventures`: name,
+  tagline, description, stage (idea/incubating/launched/exited), logo,
+  website, plus deal details that stay private to the studio — equity
+  percentage, investment amount, founder contact info, and free-form
+  notes. A venture only shows up on the public portfolio once published,
+  and the public functions never return the private deal-detail columns.
+- Anyone can browse `/ventures` without an account. Founders who want to
+  pitch a startup sign in and submit one from `/dashboard/ventures` — a
+  short form (name, tagline, description, stage, optional website/deck
+  link) that lands in the studio's review queue and emails the studio via
+  the section 13 notifications.
+- Studio reviews pitches from the same `/dashboard/studio/ventures` page:
+  move a pitch through new → reviewing → accepted/declined (the founder
+  gets emailed on either outcome), or **Promote to venture** for a
+  one-click "start tracking this as a real deal" — creates a draft
+  venture prefilled from the pitch and links it back to the application,
+  so the studio just fills in equity/investment/notes and publishes when
+  ready. A promoted application can't be promoted twice.
+- **Deliberate scope boundary**, same idea as Marketplace's "no bidding/
+  escrow" and Academy's "no video hosting": this tracks deal status and
+  shows off the portfolio — it does not run a cap table, generate term
+  sheets, or move money. The equity percentage and investment amount are
+  recorded here purely for the studio's own reference; the actual deal
+  (legal docs, wires) happens entirely outside this software.
+
+Run `supabase/migrations/016_ventures.sql` (or the updated `schema.sql`
+for a fresh install). No new environment variables.
+
+## 20. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
@@ -392,7 +427,7 @@ are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
 project's settings.
 
-## 20. The marketing site
+## 21. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get
