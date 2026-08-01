@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { withinRateLimit } from '@/lib/utils/rateLimit';
+import PasswordInput from '@/components/PasswordInput';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -117,19 +118,16 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <p className="field-hint">At least 6 characters.</p>
-          </div>
+          <PasswordInput
+            id="password"
+            label="Password"
+            autoComplete="new-password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            hint="At least 6 characters."
+          />
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? 'Creating account…' : 'Create account'}
           </button>

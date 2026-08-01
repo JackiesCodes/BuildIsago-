@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import PasswordInput from '@/components/PasswordInput';
 
 export default function ResetPasswordPage() {
   return (
@@ -75,28 +76,22 @@ function ResetPasswordForm() {
         {error && <div className="form-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="password">New password</label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="confirmPassword">Confirm password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
+          <PasswordInput
+            id="password"
+            label="New password"
+            autoComplete="new-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <PasswordInput
+            id="confirmPassword"
+            label="Confirm password"
+            autoComplete="new-password"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
           <button type="submit" className="btn btn-primary" disabled={loading || !ready}>
             {loading ? 'Saving…' : 'Update password'}
           </button>

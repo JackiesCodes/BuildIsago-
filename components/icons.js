@@ -298,6 +298,25 @@ export function IconCheck(props) {
   );
 }
 
+export function IconEye(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function IconEyeOff(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M17.5 17.6C15.9 18.7 14 19.4 12 19.4c-6.5 0-10-7-10-7a17.9 17.9 0 0 1 4.2-5.2M9.9 5.2A9.4 9.4 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-2.2 3.1" />
+      <path d="M9.9 14.1A3 3 0 0 0 14.1 9.9" />
+      <path d="M2 2l20 20" />
+    </svg>
+  );
+}
+
 export function IconRocket(props) {
   return (
     <svg {...base(props)}>

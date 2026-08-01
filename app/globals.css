@@ -183,6 +183,25 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 }
 .field-hint { font-size: 0.78rem; color: var(--muted-2); margin-top: 6px; }
 
+.password-field { position: relative; }
+.password-field input { padding-right: 44px; }
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--muted-2);
+  cursor: pointer;
+}
+.password-toggle:hover { color: var(--ink); }
+.password-toggle:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: -2px; border-radius: var(--radius-sm); }
+
 /* Shared hover/focus treatment for every other text-like input across the
    app (Studio editors, meta forms, etc.) so nothing falls back to a bare
    browser outline. */
