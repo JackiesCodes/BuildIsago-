@@ -23,7 +23,7 @@ export default async function StudioVenturesPage() {
       <div className="page-head">
         <div>
           <h1>Ventures</h1>
-          <p>BuildIsago's portfolio of incubated and invested-in startups.</p>
+          <p>BuildIsago&apos;s portfolio of incubated and invested-in startups.</p>
         </div>
         <NewVentureButton />
       </div>

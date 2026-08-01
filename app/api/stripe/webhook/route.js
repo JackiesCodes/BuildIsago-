@@ -240,5 +240,76 @@ export async function POST(req) {
     }
   }
 
+  // Catches refunds issued directly from the Stripe dashboard (not
+  // through the app's own refund actions, which already update these
+  // tables themselves) — a charge.refunded event is the only place that
+  // reaches the app when someone refunds outside the product.
+  if (event.type === 'charge.refunded') {
+    const charge = event.data.object;
+    const paymentIntentId = charge.payment_intent;
+    const refundId = charge.refunds?.data?.[0]?.id || null;
+    if (paymentIntentId) {
+      const supabase = createAdminClient();
+
+      const { data: invoice } = await supabase
+        .from('project_invoices')
+        .select('id, invoice_number, status')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .maybeSingle();
+      if (invoice && invoice.status === 'paid') {
+        await supabase
+          .from('project_invoices')
+          .update({ status: 'refunded', refunded_at: new Date().toISOString(), stripe_refund_id: refundId })
+          .eq('id', invoice.id);
+        await supabase.from('audit_log').insert({
+          action: 'invoice.refunded',
+          target_type: 'project_invoices',
+          target_id: invoice.id,
+          detail: { stripe_refund_id: refundId, source: 'stripe_dashboard' },
+        });
+        await notifyStudio({
+          subject: `Refund processed: invoice ${invoice.invoice_number}`,
+          text: `Invoice ${invoice.invoice_number} was refunded in Stripe.`,
+        });
+      }
+
+      const { data: purchase } = await supabase
+        .from('product_purchases')
+        .select('id, status')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .maybeSingle();
+      if (purchase && purchase.status === 'paid') {
+        await supabase
+          .from('product_purchases')
+          .update({ status: 'refunded', refunded_at: new Date().toISOString(), stripe_refund_id: refundId })
+          .eq('id', purchase.id);
+        await supabase.from('audit_log').insert({
+          action: 'product_purchase.refunded',
+          target_type: 'product_purchases',
+          target_id: purchase.id,
+          detail: { stripe_refund_id: refundId, source: 'stripe_dashboard' },
+        });
+      }
+
+      const { data: enrollment } = await supabase
+        .from('course_enrollments')
+        .select('id, status')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .maybeSingle();
+      if (enrollment && enrollment.status === 'paid') {
+        await supabase
+          .from('course_enrollments')
+          .update({ status: 'refunded', refunded_at: new Date().toISOString(), stripe_refund_id: refundId })
+          .eq('id', enrollment.id);
+        await supabase.from('audit_log').insert({
+          action: 'course_enrollment.refunded',
+          target_type: 'course_enrollments',
+          target_id: enrollment.id,
+          detail: { stripe_refund_id: refundId, source: 'stripe_dashboard' },
+        });
+      }
+    }
+  }
+
   return NextResponse.json({ received: true });
 }

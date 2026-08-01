@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { withinRateLimit } from '@/lib/utils/rateLimit';
 
 export default function LoginPage() {
   return (
@@ -27,6 +28,14 @@ function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
+
+    const allowed = await withinRateLimit(supabase, `login:${email.trim().toLowerCase()}`, 8, 15);
+    if (!allowed) {
+      setLoading(false);
+      setError('Too many attempts. Please wait a few minutes and try again.');
+      return;
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     setLoading(false);
@@ -79,6 +88,9 @@ function LoginForm() {
           </button>
         </form>
 
+        <p className="auth-switch">
+          <Link href="/forgot-password">Forgot your password?</Link>
+        </p>
         <p className="auth-switch">
           New to BuildIsago? <Link href="/signup">Create an account</Link>
         </p>

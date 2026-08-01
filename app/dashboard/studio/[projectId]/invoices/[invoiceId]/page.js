@@ -29,7 +29,7 @@ export default async function StudioInvoiceDetail({ params }) {
         </div>
       </div>
 
-      <InvoiceEditor invoice={invoice} projectId={projectId} />
+      <InvoiceEditor invoice={invoice} projectId={projectId} isOwner={Boolean(profile?.is_owner)} />
     </>
   );
 }

@@ -1,9 +1,18 @@
 import './globals.css';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://build-isago.vercel.app';
+
 export const metadata = {
-  title: 'BuildIsago Portal',
+  metadataBase: new URL(SITE_URL),
+  title: { default: 'BuildIsago Portal', template: '%s — BuildIsago' },
   description: 'Client portal and studio dashboard for BuildIsago projects.',
   icons: { icon: '/logo-icon.png' },
+  openGraph: {
+    siteName: 'BuildIsago',
+    type: 'website',
+    images: [{ url: '/logo-icon.png' }],
+  },
+  twitter: { card: 'summary', images: ['/logo-icon.png'] },
 };
 
 // Runs before first paint so the page never flashes the wrong theme.

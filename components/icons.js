@@ -282,6 +282,14 @@ export function IconPlayCircle(props) {
   );
 }
 
+export function IconActivity(props) {
+  return (
+    <svg {...base(props)}>
+      <path d="M3 12h4l2.5-7 5 14L17 12h4" />
+    </svg>
+  );
+}
+
 export function IconCheck(props) {
   return (
     <svg {...base(props)}>

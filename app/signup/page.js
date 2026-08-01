@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { withinRateLimit } from '@/lib/utils/rateLimit';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,6 +22,14 @@ export default function SignupPage() {
     setLoading(true);
 
     const supabase = createClient();
+
+    const allowed = await withinRateLimit(supabase, `signup:${email.trim().toLowerCase()}`, 5, 60);
+    if (!allowed) {
+      setLoading(false);
+      setError('Too many attempts. Please wait a while and try again.');
+      return;
+    }
+
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -125,6 +134,12 @@ export default function SignupPage() {
             {loading ? 'Creating account…' : 'Create account'}
           </button>
         </form>
+
+        <p className="field-hint" style={{ marginTop: 14 }}>
+          By creating an account you agree to our{' '}
+          <Link href="/terms">Terms of Service</Link> and{' '}
+          <Link href="/privacy">Privacy Policy</Link>.
+        </p>
 
         <p className="auth-switch">
           Already have an account? <Link href="/login">Sign in</Link>

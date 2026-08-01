@@ -26,7 +26,7 @@ export default async function MyMarketplacePage() {
       <div className="page-head">
         <div>
           <h1>Marketplace</h1>
-          <p>Manage your public profile and see who's reached out.</p>
+          <p>Manage your public profile and see who&apos;s reached out.</p>
         </div>
       </div>
 

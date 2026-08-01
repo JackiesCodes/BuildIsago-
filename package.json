@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "test": "vitest run"
   },
   "keywords": [],
   "author": "",
@@ -24,5 +25,10 @@
     "react-markdown": "^10.1.0",
     "resend": "^6.18.1",
     "stripe": "^18.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
+    "vitest": "^4.1.10"
   }
 }

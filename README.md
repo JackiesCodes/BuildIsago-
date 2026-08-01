@@ -9,6 +9,9 @@ This app lives at the repo root so it deploys with zero configuration (no
 Root Directory setting needed). The static marketing site lives in
 [`/site`](./site) and deploys separately — see the note at the bottom.
 
+For backups, staging, and what's still a manual/external step (Sentry,
+CAPTCHA, Stripe Tax, legal review), see [`OPERATIONS.md`](./OPERATIONS.md).
+
 ## 1. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) and create a free account.
@@ -47,7 +50,8 @@ contents of `supabase/schema.sql`, and run it. This creates:
   `project_references`, `project_invoices`, `project_approvals`, `products`,
   `product_purchases`, `project_retainers`, `talent`, `talent_requests`,
   `courses`, `course_lessons`, `course_enrollments`, `lesson_completions`,
-  `ventures`, `venture_applications` tables
+  `ventures`, `venture_applications`, `error_log`, `rate_limit_attempts`,
+  `audit_log` tables
 - Row Level Security policies (clients see only their own projects; studio
   accounts see everything)
 - A trigger that auto-creates a profile when someone signs up
@@ -417,17 +421,72 @@ inbound "pitch us your startup" intake from founders.
 Run `supabase/migrations/016_ventures.sql` (or the updated `schema.sql`
 for a fresh install). No new environment variables.
 
-## 20. Deploy
+## 20. Platform hardening
+
+The operational and security infrastructure a one-person build tends to
+skip: error visibility, abuse protection, an audit trail, refund status
+tracking, basic team permissions, password reset, and two-factor
+authentication. See [`OPERATIONS.md`](./OPERATIONS.md) for the full
+picture, including what still needs an external account or a business
+decision (Sentry, CAPTCHA, Stripe Tax, legal review).
+
+- **Error log** (`error_log` table, Studio → Activity) — every server
+  action and the Stripe webhook logs failures here via
+  `lib/logging.js`'s `logError()`, optionally forwarding to Sentry if
+  `SENTRY_DSN` is set.
+- **Audit log** (`audit_log` table, Studio → Activity) — who did what:
+  role changes, refunds, venture promotions, logged via
+  `log_audit_event()`.
+- **Rate limiting** (`check_rate_limit()`) — applied to login, signup,
+  password reset requests, venture pitches, and talent hire requests.
+  Fails open (proceeds) if the check itself errors, so a database blip
+  never locks out real users.
+- **Refunds** — issuing one (through the app or directly in the Stripe
+  dashboard) flips the invoice/purchase/enrollment to `refunded` and
+  notifies the relevant party. Scoped to one-time payments; refunding a
+  charge within an active retainer subscription stays a manual Stripe
+  operation. **The `charge.refunded` event still needs to be added to
+  the Stripe webhook's subscribed events** — the handler is in place,
+  just not subscribed yet.
+- **RBAC, first cut** (`profiles.is_owner`) — a studio account can be a
+  full owner or a limited member; members keep full day-to-day
+  visibility but can't create, edit, or delete invoices, retainers, or
+  ventures. Set manually via the dashboard, same as studio promotion.
+- **Password reset** (`/forgot-password`, `/reset-password`) and
+  **two-factor authentication** (Settings → Two-factor authentication,
+  TOTP via an authenticator app) — enforced server-side in
+  `lib/supabase/middleware.js`, not just as a client-side redirect after
+  login.
+- **SEO** — `app/robots.js` and a dynamic `app/sitemap.js` covering every
+  published product/course/venture/talent profile, plus site-wide Open
+  Graph metadata in the root layout.
+- **Legal pages** (`/privacy`, `/terms`) — genuine first drafts covering
+  the product's actual data practices and subprocessors (Supabase,
+  Stripe, Resend, Anthropic). Linked from signup and the marketing site
+  footer. **Not a substitute for real legal review** — see the note at
+  the top of each page's source.
+- **Tests + CI** — `npm test` (Vitest, unit tests for the pure
+  utility/logic functions) and `.github/workflows/ci.yml` (lint, test,
+  build on every push/PR).
+
+Run `supabase/migrations/017_platform_hardening.sql` (or the updated
+`schema.sql` for a fresh install). New optional environment variable:
+`SENTRY_DSN` (error tracking — omit it and errors still log to the
+in-app `error_log` table).
+
+## 21. Deploy
 
 This is a standard Next.js app rooted at the repo root — import the repo in
 [Vercel](https://vercel.com) with the default settings (no Root Directory
 override needed) and add the environment variables (Supabase URL, Supabase
 publishable key, `ANTHROPIC_API_KEY`, and — if invoicing or notifications
 are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-`SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in the
-project's settings.
+`SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`,
+`SENTRY_DSN`) in the project's settings. Also set `NEXT_PUBLIC_SITE_URL`
+to the production domain — it's used by `sitemap.xml`, `robots.txt`, and
+Open Graph metadata.
 
-## 21. The marketing site
+## 22. The marketing site
 
 The static marketing site (`index.html` + `assets/`) lives in
 [`/site`](./site) and is unrelated to this Next.js app — it doesn't get

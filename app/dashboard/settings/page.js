@@ -1,5 +1,6 @@
 import { getSessionProfile } from '@/lib/supabase/server';
 import AppearanceSettings from '@/components/AppearanceSettings';
+import MfaSettings from '@/components/MfaSettings';
 
 export default async function SettingsPage() {
   const { user, profile } = await getSessionProfile();
@@ -33,6 +34,11 @@ export default async function SettingsPage() {
             <span>{profile.company}</span>
           </div>
         )}
+      </div>
+
+      <div className="card" style={{ marginBottom: 20, maxWidth: 560 }}>
+        <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Two-factor authentication</h3>
+        <MfaSettings />
       </div>
 
       <div className="card" style={{ maxWidth: 560 }}>

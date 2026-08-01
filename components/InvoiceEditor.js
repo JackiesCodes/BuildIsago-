@@ -8,6 +8,7 @@ import {
   markInvoicePaidManually,
   voidInvoice,
   deleteInvoice,
+  refundInvoice,
 } from '@/lib/actions/invoices';
 import { computeInvoiceTotals, formatMoney } from '@/lib/utils/money';
 import { CURRENCIES } from '@/lib/constants/currencies';
@@ -71,7 +72,7 @@ function LineItemsEditor({ items, currency, onChange }) {
   );
 }
 
-export default function InvoiceEditor({ invoice, projectId }) {
+export default function InvoiceEditor({ invoice, projectId, isOwner }) {
   const router = useRouter();
   const [lineItems, setLineItems] = useState(
     invoice.line_items?.length ? invoice.line_items : [{ description: '', quantity: 1, unit_price: 0 }]
@@ -129,6 +130,16 @@ export default function InvoiceEditor({ invoice, projectId }) {
     setError(null);
     startTransition(async () => {
       const result = await voidInvoice(invoice.id, projectId);
+      if (result?.error) setError(result.error);
+      else router.refresh();
+    });
+  }
+
+  function handleRefund() {
+    if (!confirm('Refund this invoice through Stripe? This cannot be undone.')) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await refundInvoice(invoice.id, projectId);
       if (result?.error) setError(result.error);
       else router.refresh();
     });
@@ -253,10 +264,22 @@ export default function InvoiceEditor({ invoice, projectId }) {
             </button>
           </>
         )}
-        {invoice.status === 'paid' && invoice.paid_at && (
-          <span className="design-save-status">Paid {new Date(invoice.paid_at).toLocaleString()}</span>
+        {invoice.status === 'paid' && (
+          <>
+            {invoice.paid_at && <span className="design-save-status">Paid {new Date(invoice.paid_at).toLocaleString()}</span>}
+            {isOwner && invoice.stripe_payment_intent_id && (
+              <button type="button" className="btn btn-danger" onClick={handleRefund} disabled={pending}>
+                Refund
+              </button>
+            )}
+          </>
         )}
         {invoice.status === 'void' && <span className="design-save-status">Voided</span>}
+        {invoice.status === 'refunded' && (
+          <span className="design-save-status">
+            Refunded {invoice.refunded_at ? new Date(invoice.refunded_at).toLocaleString() : ''}
+          </span>
+        )}
       </div>
     </div>
   );

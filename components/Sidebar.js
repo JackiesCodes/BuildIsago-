@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  IconActivity,
   IconDownload,
   IconGraduationCap,
   IconKanban,
@@ -29,6 +30,7 @@ const NAV = {
     { href: '/dashboard/studio/academy', label: 'Academy', icon: IconGraduationCap },
     { href: '/dashboard/studio/talent', label: 'Talent', icon: IconUsers },
     { href: '/dashboard/studio/ventures', label: 'Ventures', icon: IconRocket },
+    { href: '/dashboard/studio/activity', label: 'Activity', icon: IconActivity },
     { href: '/dashboard/downloads', label: 'Downloads', icon: IconDownload },
   ],
 };

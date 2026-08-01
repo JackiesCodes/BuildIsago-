@@ -93,7 +93,7 @@ export default function RetainerEditor({ retainer, projectId }) {
             </div>
           </div>
           <div className="field">
-            <label>What's included</label>
+            <label>What&apos;s included</label>
             <textarea
               rows={4}
               value={description}

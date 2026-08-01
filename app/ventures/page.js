@@ -25,7 +25,7 @@ export default async function VenturesPage() {
         <div className="page-head">
           <div>
             <h1>BuildIsago Ventures</h1>
-            <p>Startup incubation and product investments — the studio's own portfolio.</p>
+            <p>Startup incubation and product investments — the studio&apos;s own portfolio.</p>
           </div>
           <Link href="/dashboard/ventures" className="btn btn-ghost" style={{ width: 'auto' }}>
             Pitch your startup
