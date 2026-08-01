@@ -62,7 +62,7 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
       {role === 'client' && (
         <Link href="/dashboard/client/new" className="sidebar-cta">
           <IconPlus />
-          New Project
+          <span>New Project</span>
         </Link>
       )}
 
