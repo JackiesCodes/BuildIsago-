@@ -453,6 +453,79 @@ input[type='color']:focus-visible {
   padding: 2px 6px;
 }
 
+/* Command palette */
+.command-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 12, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 20px 20px;
+  z-index: 1000;
+}
+.command-palette {
+  width: 100%;
+  max-width: 560px;
+  max-height: 60vh;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.command-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.command-search svg { width: 18px; height: 18px; color: var(--muted-2); flex-shrink: 0; }
+.command-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.command-search input::placeholder { color: var(--muted-2); }
+.command-close {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  padding: 2px 6px;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.command-list { list-style: none; margin: 0; padding: 8px; overflow-y: auto; }
+.command-empty { padding: 20px; text-align: center; color: var(--muted-2); font-size: 0.88rem; }
+.command-list button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+}
+.command-list button svg { width: 17px; height: 17px; color: var(--muted-2); flex-shrink: 0; }
+.command-list button.active { background: var(--surface-2); }
+.command-list button.active svg { color: var(--accent-ink-strong); }
+
 .topbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .theme-toggle {
   width: 36px;
@@ -658,6 +731,8 @@ input[type='color']:focus-visible {
 .kanban-card-title { font-weight: 600; font-size: 0.92rem; }
 .kanban-card-client { font-size: 0.78rem; color: var(--muted-2); }
 .kanban-card .status-select { width: 100%; font-size: 0.75rem; padding: 6px 8px; }
+
+.kanban-swipe-dots { display: none; }
 
 /* Status badges */
 .status-badge {
@@ -888,6 +963,23 @@ input[type='color']:focus-visible {
 .detail-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 30px; align-items: start; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 0.88rem; margin-bottom: 20px; }
 .back-link:hover { color: var(--accent-ink-strong); }
+
+.breadcrumbs { margin-bottom: 20px; }
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+.breadcrumbs li { display: flex; align-items: center; gap: 6px; }
+.breadcrumbs a { color: var(--muted); }
+.breadcrumbs a:hover { color: var(--accent-ink-strong); }
+.breadcrumbs span[aria-current] { color: var(--ink); font-weight: 500; }
+.breadcrumb-sep { color: var(--muted-2); }
 
 .project-tabs {
   display: flex;
@@ -1591,7 +1683,42 @@ input[type='color']:focus-visible {
   .greeting { margin-bottom: 30px; }
   .page-head { margin-bottom: 30px; }
   .stats-row { grid-template-columns: 1fr; }
-  .kanban-board { grid-template-columns: 1fr; }
+  /* A vertical stack would force scrolling through every "done" card in
+     column 1 before reaching column 2; swipeable, snapped columns (like
+     Trello/Linear mobile) keep each column reachable in one gesture. The
+     next column peeking in at the edge is the swipe affordance. */
+  .kanban-board {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 14px;
+    margin: 0 -20px;
+    padding: 0 20px 4px;
+  }
+  .kanban-column { flex: 0 0 88%; scroll-snap-align: start; }
+  .kanban-swipe-dots { display: flex; justify-content: center; gap: 4px; margin-top: 14px; }
+  .kanban-swipe-dots button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .kanban-swipe-dots button::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--border-strong);
+    transition: background 0.15s ease, width 0.15s ease;
+  }
+  .kanban-swipe-dots button.active::before { background: var(--accent-ink-strong); width: 18px; border-radius: 999px; }
   .quick-start-grid { grid-template-columns: 1fr; }
   .app-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .sidebar {

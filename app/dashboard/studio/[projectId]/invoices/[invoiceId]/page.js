@@ -1,12 +1,14 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import InvoiceEditor from '@/components/InvoiceEditor';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default async function StudioInvoiceDetail({ params }) {
   const { projectId, invoiceId } = await params;
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
+
+  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).maybeSingle();
 
   const { data: invoice } = await supabase
     .from('project_invoices')
@@ -19,9 +21,14 @@ export default async function StudioInvoiceDetail({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/studio/${projectId}/invoices`} className="back-link">
-        &larr; Back to invoices
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Pipeline', href: '/dashboard/studio' },
+          { label: project?.title || 'Project', href: `/dashboard/studio/${projectId}` },
+          { label: 'Invoices', href: `/dashboard/studio/${projectId}/invoices` },
+          { label: `Invoice ${invoice.invoice_number}` },
+        ]}
+      />
 
       <div className="page-head">
         <div>

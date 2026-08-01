@@ -3,6 +3,7 @@ import { getSessionProfile } from '@/lib/supabase/server';
 import { signOut } from '@/lib/actions/auth';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
+import CommandPalette from '@/components/CommandPalette';
 
 export default async function DashboardLayout({ children }) {
   const { user, profile } = await getSessionProfile();
@@ -26,6 +27,7 @@ export default async function DashboardLayout({ children }) {
           <div className="container">{children}</div>
         </main>
       </div>
+      <CommandPalette role={role} signOutAction={signOut} />
     </div>
   );
 }

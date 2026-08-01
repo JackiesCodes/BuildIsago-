@@ -1,11 +1,13 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import ApprovalView from '@/components/ApprovalView';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default async function ClientApprovalDetail({ params }) {
   const { projectId, approvalId } = await params;
   const { supabase } = await getSessionProfile();
+
+  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).maybeSingle();
 
   const { data: approval } = await supabase
     .from('project_approvals')
@@ -29,9 +31,14 @@ export default async function ClientApprovalDetail({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/client/${projectId}/approvals`} className="back-link">
-        &larr; Back to approvals
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Projects', href: '/dashboard/client' },
+          { label: project?.title || 'Project', href: `/dashboard/client/${projectId}` },
+          { label: 'Approvals', href: `/dashboard/client/${projectId}/approvals` },
+          { label: 'Approval Request' },
+        ]}
+      />
 
       <div className="page-head">
         <div>

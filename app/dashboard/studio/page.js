@@ -4,6 +4,7 @@ import { getSessionProfile } from '@/lib/supabase/server';
 import StatusSelect from '@/components/StatusSelect';
 import PriorityBadge from '@/components/PriorityBadge';
 import DueDate from '@/components/DueDate';
+import KanbanSwipeDots from '@/components/KanbanSwipeDots';
 import { SERVICES, serviceLabel } from '@/lib/constants/services';
 
 const COLUMNS = [
@@ -78,7 +79,7 @@ export default async function StudioDashboard({ searchParams }) {
             ))}
           </div>
 
-          <div className="kanban-board">
+          <div className="kanban-board" id="kanban-board">
             {COLUMNS.map((col) => {
               const items = all.filter((p) => p.status === col.key).sort(byUrgency);
               return (
@@ -111,6 +112,7 @@ export default async function StudioDashboard({ searchParams }) {
               );
             })}
           </div>
+          <KanbanSwipeDots boardId="kanban-board" columns={COLUMNS} />
         </>
       )}
     </>

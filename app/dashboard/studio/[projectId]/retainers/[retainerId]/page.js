@@ -1,12 +1,14 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import RetainerEditor from '@/components/RetainerEditor';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default async function StudioRetainerDetail({ params }) {
   const { projectId, retainerId } = await params;
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
+
+  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).maybeSingle();
 
   const { data: retainer } = await supabase
     .from('project_retainers')
@@ -19,9 +21,14 @@ export default async function StudioRetainerDetail({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/studio/${projectId}/retainers`} className="back-link">
-        &larr; Back to retainers
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Pipeline', href: '/dashboard/studio' },
+          { label: project?.title || 'Project', href: `/dashboard/studio/${projectId}` },
+          { label: 'Retainers', href: `/dashboard/studio/${projectId}/retainers` },
+          { label: 'Retainer' },
+        ]}
+      />
 
       <div className="page-head">
         <div>

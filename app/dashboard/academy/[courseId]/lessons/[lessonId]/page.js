@@ -2,11 +2,15 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import LessonCompleteToggle from '@/components/LessonCompleteToggle';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { toEmbedUrl } from '@/lib/utils/videoEmbed';
 
 export default async function LessonPage({ params }) {
   const { courseId, lessonId } = await params;
   const { supabase } = await getSessionProfile();
+
+  const { data: enrollments } = await supabase.rpc('get_my_enrollments');
+  const enrollment = (enrollments || []).find((e) => e.course_id === courseId);
 
   const { data: lessons } = await supabase.rpc('get_course_lessons_for_student', { p_course_id: courseId });
   if (!lessons) notFound();
@@ -21,9 +25,13 @@ export default async function LessonPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/academy/${courseId}`} className="back-link">
-        &larr; Back to course
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Academy', href: '/dashboard/academy' },
+          { label: enrollment?.course_title || 'Course', href: `/dashboard/academy/${courseId}` },
+          { label: lesson.title },
+        ]}
+      />
 
       <div className="page-head">
         <div>

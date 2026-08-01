@@ -1,12 +1,14 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import RetainerView from '@/components/RetainerView';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default async function ClientRetainerDetail({ params, searchParams }) {
   const { projectId, retainerId } = await params;
   const { subscribed } = await searchParams;
   const { supabase } = await getSessionProfile();
+
+  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).maybeSingle();
 
   const { data: retainer } = await supabase
     .from('project_retainers')
@@ -20,9 +22,14 @@ export default async function ClientRetainerDetail({ params, searchParams }) {
 
   return (
     <>
-      <Link href={`/dashboard/client/${projectId}/retainers`} className="back-link">
-        &larr; Back to retainers
-      </Link>
+      <Breadcrumbs
+        items={[
+          { label: 'Projects', href: '/dashboard/client' },
+          { label: project?.title || 'Project', href: `/dashboard/client/${projectId}` },
+          { label: 'Retainers', href: `/dashboard/client/${projectId}/retainers` },
+          { label: 'Retainer' },
+        ]}
+      />
 
       <div className="page-head">
         <div>
