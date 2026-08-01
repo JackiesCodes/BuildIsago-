@@ -7,10 +7,17 @@ import { IconCircle, IconDownload, IconImage, IconSquare, IconTrash, IconType } 
 
 const FONT_FAMILIES = ['Inter', 'Space Grotesk', 'JetBrains Mono', 'Georgia', 'Arial'];
 
+const ZOOM_STEPS = [0.1, 0.25, 0.5, 0.75, 1, 1.5, 2];
+
 export default function DesignEditor({ design, backHref, references = [] }) {
   const canvasElRef = useRef(null);
   const fabricRef = useRef(null);
   const fabricModuleRef = useRef(null);
+  const wrapRef = useRef(null);
+  // Once the user picks a zoom themselves we stop re-fitting under them
+  // on resize — an editor that silently rescales your work is worse
+  // than one that needs a click.
+  const userZoomedRef = useRef(false);
 
   const [title, setTitle] = useState(design.title);
   const [selection, setSelection] = useState(null);
@@ -18,6 +25,63 @@ export default function DesignEditor({ design, backHref, references = [] }) {
   const [savedAt, setSavedAt] = useState(design.updated_at);
   const [error, setError] = useState(null);
   const [showReferences, setShowReferences] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [ready, setReady] = useState(false);
+
+  const computeFit = useCallback(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return 1;
+    const pad = 72;
+    return Math.min(
+      Math.max((wrap.clientWidth - pad) / design.width, 0.1),
+      Math.max((wrap.clientHeight - pad) / design.height, 0.1),
+      1
+    );
+  }, [design.width, design.height]);
+
+  const fitToScreen = useCallback(() => {
+    userZoomedRef.current = false;
+    setZoom(computeFit());
+  }, [computeFit]);
+
+  // An artboard can easily be larger than the viewport (1080x1080 is the
+  // default), so measure and fit on mount and on resize. Uses an
+  // observer callback rather than a bare effect body so the initial
+  // measurement happens after layout, with real dimensions.
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return undefined;
+    const observer = new ResizeObserver(() => {
+      if (!userZoomedRef.current) setZoom(computeFit());
+    });
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, [computeFit]);
+
+  // Fabric owns the canvas element's inline styles (it wraps it in its
+  // own container), so zoom has to go through setDimensions rather than
+  // a React style prop, which Fabric would overwrite. cssOnly keeps the
+  // backing resolution at full size, so exports stay sharp at any zoom.
+  useEffect(() => {
+    const canvas = fabricRef.current;
+    if (!canvas || !ready) return;
+    canvas.setDimensions(
+      { width: design.width * zoom, height: design.height * zoom },
+      { cssOnly: true }
+    );
+  }, [zoom, ready, design.width, design.height]);
+
+  function stepZoom(direction) {
+    userZoomedRef.current = true;
+    setZoom((current) => {
+      const next =
+        direction > 0
+          ? ZOOM_STEPS.find((z) => z > current + 0.001)
+          : [...ZOOM_STEPS].reverse().find((z) => z < current - 0.001);
+      return next ?? current;
+    });
+  }
 
   useEffect(() => {
     let disposed = false;
@@ -38,8 +102,16 @@ export default function DesignEditor({ design, backHref, references = [] }) {
 
       if (design.canvas_json && Object.keys(design.canvas_json).length) {
         await canvas.loadFromJSON(design.canvas_json);
-        canvas.requestRenderAll();
       }
+
+      // A brand-new design never hit the branch above, so its white
+      // backgroundColor was set but never painted and the artboard
+      // rendered fully transparent on screen. (Export was unaffected —
+      // Fabric's toDataURL re-renders into its own canvas.) Render
+      // unconditionally, and only default the colour when the loaded
+      // document didn't bring its own.
+      if (!canvas.backgroundColor) canvas.backgroundColor = '#ffffff';
+      canvas.requestRenderAll();
 
       const syncSelection = () => {
         const obj = canvas.getActiveObject();
@@ -55,9 +127,15 @@ export default function DesignEditor({ design, backHref, references = [] }) {
         });
       };
 
+      const syncEmpty = () => setIsEmpty(canvas.getObjects().length === 0);
+      syncEmpty();
+      setReady(true);
+
       canvas.on('selection:created', syncSelection);
       canvas.on('selection:updated', syncSelection);
       canvas.on('selection:cleared', () => setSelection(null));
+      canvas.on('object:added', syncEmpty);
+      canvas.on('object:removed', syncEmpty);
     })();
 
     return () => {
@@ -331,6 +409,21 @@ export default function DesignEditor({ design, backHref, references = [] }) {
           >
             <IconTrash />
           </button>
+
+          <span className="design-toolbar-divider" />
+
+          <div className="design-zoom">
+            <button type="button" onClick={() => stepZoom(-1)} aria-label="Zoom out" title="Zoom out">
+              &minus;
+            </button>
+            <span aria-live="polite">{Math.round(zoom * 100)}%</span>
+            <button type="button" onClick={() => stepZoom(1)} aria-label="Zoom in" title="Zoom in">
+              +
+            </button>
+            <button type="button" className="design-tool-text" onClick={fitToScreen}>
+              Fit
+            </button>
+          </div>
         </div>
 
         <div className="design-toolbar-right">
@@ -338,8 +431,8 @@ export default function DesignEditor({ design, backHref, references = [] }) {
           <span className="design-save-status">
             {saving ? 'Saving…' : savedAt ? `Saved ${new Date(savedAt).toLocaleTimeString()}` : 'Not saved yet'}
           </span>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={handleSave} disabled={saving}>
-            Save
+          <button type="button" className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
           </button>
           <button type="button" className="btn btn-ghost btn-sm" onClick={handleExportPNG}>
             <IconDownload /> PNG
@@ -351,43 +444,74 @@ export default function DesignEditor({ design, backHref, references = [] }) {
       </div>
 
       <div className="design-body">
-        <div className="design-canvas-wrap">
-          <canvas ref={canvasElRef} width={design.width} height={design.height} />
+        <div className="design-canvas-wrap" ref={wrapRef}>
+          <div className="design-artboard">
+            <canvas ref={canvasElRef} width={design.width} height={design.height} />
+            {isEmpty && (
+              <div className="design-empty-hint">
+                <p>Blank artboard</p>
+                <span>Add a shape, some text, or an image from the toolbar to start.</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {selection && (
-          <aside className="design-properties">
-            <h4>Properties</h4>
-            <div className="field" style={{ marginBottom: 14 }}>
-              <label>Fill color</label>
-              <input type="color" value={selection.fill} onChange={(e) => updateFill(e.target.value)} />
-            </div>
-            {isText && (
-              <>
-                <div className="field" style={{ marginBottom: 14 }}>
-                  <label>Font</label>
-                  <select value={selection.fontFamily} onChange={(e) => updateFontFamily(e.target.value)}>
-                    {FONT_FAMILIES.map((f) => (
-                      <option key={f} value={f}>
-                        {f}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <label>Size</label>
-                  <input
-                    type="number"
-                    min={8}
-                    max={200}
-                    value={selection.fontSize}
-                    onChange={(e) => updateFontSize(Number(e.target.value))}
-                  />
-                </div>
-              </>
-            )}
-          </aside>
-        )}
+        {/* Rendered whether or not something is selected — a panel that
+            appears on click would shift the artboard sideways mid-edit. */}
+        <aside className="design-properties">
+          <h4>Properties</h4>
+          {selection ? (
+            <>
+              <div className="field" style={{ marginBottom: 14 }}>
+                <label htmlFor="design-fill">Fill color</label>
+                <input
+                  id="design-fill"
+                  type="color"
+                  value={selection.fill}
+                  onChange={(e) => updateFill(e.target.value)}
+                />
+              </div>
+              {isText && (
+                <>
+                  <div className="field" style={{ marginBottom: 14 }}>
+                    <label htmlFor="design-font">Font</label>
+                    <select
+                      id="design-font"
+                      value={selection.fontFamily}
+                      onChange={(e) => updateFontFamily(e.target.value)}
+                    >
+                      {FONT_FAMILIES.map((f) => (
+                        <option key={f} value={f}>
+                          {f}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="design-size">Size</label>
+                    <input
+                      id="design-size"
+                      type="number"
+                      min={8}
+                      max={200}
+                      value={selection.fontSize}
+                      onChange={(e) => updateFontSize(Number(e.target.value))}
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <p className="design-properties-empty">
+              Select something on the artboard to edit its colour and type.
+            </p>
+          )}
+
+          <div className="design-canvas-meta">
+            <span>Artboard</span>
+            <span>{design.width} × {design.height}</span>
+          </div>
+        </aside>
       </div>
     </div>
   );

@@ -1069,7 +1069,10 @@ input[type='color']:focus-visible {
 }
 
 /* Design Studio: full-screen canvas editor */
-.design-editor { min-height: 100dvh; display: flex; flex-direction: column; background: var(--bg-alt); }
+/* Fixed viewport, not min-height: the canvas area has to be a real
+   scroll viewport with a known height, otherwise it grows to fit the
+   artboard and fit-to-screen has nothing to measure against. */
+.design-editor { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-alt); }
 .design-toolbar {
   display: flex;
   align-items: center;
@@ -1123,22 +1126,95 @@ input[type='color']:focus-visible {
 .design-save-status { font-size: 0.78rem; color: var(--muted-2); font-family: var(--font-mono); white-space: nowrap; }
 .design-save-error { font-size: 0.78rem; color: var(--danger); }
 
-.design-body { flex: 1; display: flex; overflow: auto; }
+.design-body { flex: 1; display: flex; min-height: 0; overflow: hidden; }
 .design-canvas-wrap {
   flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 36px;
   overflow: auto;
+  /* Deliberately darker than any app surface: a white artboard on a
+     near-white background has no edge, so the thing being designed does
+     not read as a page. Every canvas editor darkens the surround for
+     this reason. */
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+    #1b2530;
 }
-.design-canvas-wrap canvas { box-shadow: 0 24px 60px -24px var(--shadow-color); }
+:root[data-theme='light'] .design-canvas-wrap {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5), transparent 60%),
+    #c3ced6;
+}
+.design-artboard { position: relative; flex: none; }
+.design-artboard canvas {
+  display: block;
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.55);
+  border-radius: 2px;
+}
+.design-empty-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 24px;
+  pointer-events: none;
+  color: #5e7480;
+}
+.design-empty-hint p { font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin: 0; color: #3f5b66; }
+.design-empty-hint span { font-size: 0.85rem; max-width: 30ch; line-height: 1.5; }
+
+.design-zoom { display: flex; align-items: center; gap: 2px; }
+.design-zoom > span {
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.design-zoom > button:not(.design-tool-text) {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.design-zoom > button:not(.design-tool-text):hover { background: var(--surface-2); color: var(--ink); }
+
 .design-properties {
   width: 240px;
   flex-shrink: 0;
   border-left: 1px solid var(--border);
   background: var(--bg-alt);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.design-properties-empty { font-size: 0.85rem; color: var(--muted-2); line-height: 1.6; }
+.design-canvas-meta {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted-2);
 }
 .design-properties h4 { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 16px; }
 .design-properties .field label { display: block; font-size: 0.72rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-2); margin-bottom: 6px; }
@@ -1897,13 +1973,27 @@ input[type='color']:focus-visible {
      canvas attributes, so a CSS-scaled canvas stays interactive). */
   .design-toolbar { padding: 10px 14px; gap: 8px 10px; }
   .design-title-input { min-width: 0; flex: 1 1 auto; font-size: 0.92rem; }
-  .design-toolbar-tools { order: 3; flex-basis: 100%; }
+  /* Wrap rather than clip — zoom sits at the end of this group and is
+     the one control you cannot work without on a small screen. */
+  .design-toolbar-tools { order: 3; flex-basis: 100%; flex-wrap: wrap; row-gap: 6px; }
   .design-toolbar-right { order: 2; margin-left: auto; }
   .design-save-status { display: none; }
   .design-body { flex-direction: column; }
   .design-canvas-wrap { padding: 16px; }
-  .design-canvas-wrap canvas { max-width: 100%; height: auto !important; }
-  .design-properties { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+  /* Zoom now measures and fits the artboard, so no !important override
+     is needed here — one that forced height:auto would fight it and
+     break the aspect ratio at any zoom other than fit. */
+  .design-properties {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .design-properties h4 { flex: 1 1 100%; margin-bottom: 0; }
+  .design-canvas-meta { margin-top: 0; padding-top: 0; border-top: none; flex: 1 1 100%; }
 
   /* Brand Studio: stack each color row instead of cramming swatch,
      name, hex, and contrast labels into one line. */
