@@ -5,13 +5,30 @@ import MarketplaceHeader from '@/components/MarketplaceHeader';
 import ContactTalentForm from '@/components/ContactTalentForm';
 import { talentDisciplineLabel } from '@/lib/constants/talentDisciplines';
 import { formatMoney } from '@/lib/utils/money';
+import { logError } from '@/lib/logging';
 
 export default async function TalentProfilePage({ params }) {
   const { talentId } = await params;
   const supabase = await createClient();
 
-  const { data: talent } = await supabase.rpc('get_public_talent', { p_id: talentId }).maybeSingle();
-  if (!talent) notFound();
+  const { data: talent, error } = await supabase.rpc('get_public_talent', { p_id: talentId }).maybeSingle();
+  if (error) await logError('marketplace.get_public_talent', error, { talentId });
+  if (!talent) {
+    if (error) {
+      return (
+        <div className="store-page">
+          <MarketplaceHeader />
+          <div className="container store-container">
+            <div className="empty-state">
+              <h3>Something went wrong</h3>
+              <p>We couldn&apos;t load this profile right now — please try again shortly.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   return (
     <div className="store-page">

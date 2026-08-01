@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import StoreHeader from '@/components/StoreHeader';
 import ProductCard from '@/components/ProductCard';
 import { publicPreviewUrl } from '@/lib/utils/storage';
+import { logError } from '@/lib/logging';
 
 export const metadata = {
   title: 'Digital Products — BuildIsago',
@@ -10,7 +11,8 @@ export const metadata = {
 
 export default async function StorePage() {
   const supabase = await createClient();
-  const { data: products } = await supabase.rpc('list_published_products');
+  const { data: products, error } = await supabase.rpc('list_published_products');
+  if (error) await logError('store.list_published_products', error);
 
   const withUrls = (products || []).map((p) => ({
     ...p,
@@ -30,8 +32,8 @@ export default async function StorePage() {
 
         {!withUrls.length ? (
           <div className="empty-state">
-            <h3>Nothing here yet</h3>
-            <p>Check back soon — new products are on the way.</p>
+            <h3>{error ? 'Something went wrong' : 'Nothing here yet'}</h3>
+            <p>{error ? "We couldn't load the catalog right now — please try again shortly." : 'Check back soon — new products are on the way.'}</p>
           </div>
         ) : (
           <div className="product-grid">

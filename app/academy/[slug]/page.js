@@ -7,13 +7,30 @@ import LessonOutlineList from '@/components/LessonOutlineList';
 import { publicCourseCoverUrl } from '@/lib/utils/storage';
 import { courseLevelLabel } from '@/lib/constants/courseLevels';
 import { formatMoney } from '@/lib/utils/money';
+import { logError } from '@/lib/logging';
 
 export default async function CourseDetailPage({ params }) {
   const { slug } = await params;
   const { user, supabase } = await getSessionProfile();
 
-  const { data: course } = await supabase.rpc('get_published_course', { p_slug: slug }).maybeSingle();
-  if (!course) notFound();
+  const { data: course, error } = await supabase.rpc('get_published_course', { p_slug: slug }).maybeSingle();
+  if (error) await logError('academy.get_published_course', error, { slug });
+  if (!course) {
+    if (error) {
+      return (
+        <div className="store-page">
+          <AcademyHeader />
+          <div className="container store-container">
+            <div className="empty-state">
+              <h3>Something went wrong</h3>
+              <p>We couldn&apos;t load this course right now — please try again shortly.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   let alreadyEnrolled = false;
   if (user) {

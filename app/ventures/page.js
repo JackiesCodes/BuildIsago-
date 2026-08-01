@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import VenturesHeader from '@/components/VenturesHeader';
 import VentureCard from '@/components/VentureCard';
 import { publicVentureLogoUrl } from '@/lib/utils/storage';
+import { logError } from '@/lib/logging';
 
 export const metadata = {
   title: 'Ventures — BuildIsago',
@@ -11,7 +12,8 @@ export const metadata = {
 
 export default async function VenturesPage() {
   const supabase = await createClient();
-  const { data: ventures } = await supabase.rpc('list_published_ventures');
+  const { data: ventures, error } = await supabase.rpc('list_published_ventures');
+  if (error) await logError('ventures.list_published_ventures', error);
 
   const withUrls = (ventures || []).map((v) => ({
     ...v,
@@ -34,8 +36,12 @@ export default async function VenturesPage() {
 
         {!withUrls.length ? (
           <div className="empty-state">
-            <h3>Nothing published yet</h3>
-            <p>Check back soon — the portfolio is just getting started.</p>
+            <h3>{error ? 'Something went wrong' : 'Nothing published yet'}</h3>
+            <p>
+              {error
+                ? "We couldn't load the portfolio right now — please try again shortly."
+                : 'Check back soon — the portfolio is just getting started.'}
+            </p>
           </div>
         ) : (
           <div className="product-grid">

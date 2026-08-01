@@ -4,13 +4,30 @@ import { createClient } from '@/lib/supabase/server';
 import VenturesHeader from '@/components/VenturesHeader';
 import { publicVentureLogoUrl } from '@/lib/utils/storage';
 import { ventureStageLabel } from '@/lib/constants/ventureStages';
+import { logError } from '@/lib/logging';
 
 export default async function VentureDetailPage({ params }) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: venture } = await supabase.rpc('get_published_venture', { p_slug: slug }).maybeSingle();
-  if (!venture) notFound();
+  const { data: venture, error } = await supabase.rpc('get_published_venture', { p_slug: slug }).maybeSingle();
+  if (error) await logError('ventures.get_published_venture', error, { slug });
+  if (!venture) {
+    if (error) {
+      return (
+        <div className="store-page">
+          <VenturesHeader />
+          <div className="container store-container">
+            <div className="empty-state">
+              <h3>Something went wrong</h3>
+              <p>We couldn&apos;t load this venture right now — please try again shortly.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   const logoUrl = publicVentureLogoUrl(supabase, venture.logo_path);
 

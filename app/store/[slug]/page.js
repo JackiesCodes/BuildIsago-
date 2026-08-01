@@ -7,13 +7,30 @@ import DownloadProductButton from '@/components/DownloadProductButton';
 import { publicPreviewUrl } from '@/lib/utils/storage';
 import { productCategoryLabel } from '@/lib/constants/productCategories';
 import { formatMoney } from '@/lib/utils/money';
+import { logError } from '@/lib/logging';
 
 export default async function ProductDetailPage({ params }) {
   const { slug } = await params;
   const { user, supabase } = await getSessionProfile();
 
-  const { data: product } = await supabase.rpc('get_published_product', { p_slug: slug }).maybeSingle();
-  if (!product) notFound();
+  const { data: product, error } = await supabase.rpc('get_published_product', { p_slug: slug }).maybeSingle();
+  if (error) await logError('store.get_published_product', error, { slug });
+  if (!product) {
+    if (error) {
+      return (
+        <div className="store-page">
+          <StoreHeader />
+          <div className="container store-container">
+            <div className="empty-state">
+              <h3>Something went wrong</h3>
+              <p>We couldn&apos;t load this product right now — please try again shortly.</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   let alreadyOwned = false;
   if (user) {

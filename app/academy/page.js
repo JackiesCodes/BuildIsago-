@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import AcademyHeader from '@/components/AcademyHeader';
 import CourseCard from '@/components/CourseCard';
 import { publicCourseCoverUrl } from '@/lib/utils/storage';
+import { logError } from '@/lib/logging';
 
 export const metadata = {
   title: 'Academy — BuildIsago',
@@ -10,7 +11,8 @@ export const metadata = {
 
 export default async function AcademyPage() {
   const supabase = await createClient();
-  const { data: courses } = await supabase.rpc('list_published_courses');
+  const { data: courses, error } = await supabase.rpc('list_published_courses');
+  if (error) await logError('academy.list_published_courses', error);
 
   const withUrls = (courses || []).map((c) => ({
     ...c,
@@ -30,8 +32,8 @@ export default async function AcademyPage() {
 
         {!withUrls.length ? (
           <div className="empty-state">
-            <h3>Nothing here yet</h3>
-            <p>Check back soon — new courses are on the way.</p>
+            <h3>{error ? 'Something went wrong' : 'Nothing here yet'}</h3>
+            <p>{error ? "We couldn't load the catalog right now — please try again shortly." : 'Check back soon — new courses are on the way.'}</p>
           </div>
         ) : (
           <div className="product-grid">

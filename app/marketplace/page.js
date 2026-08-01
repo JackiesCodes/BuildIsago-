@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import MarketplaceHeader from '@/components/MarketplaceHeader';
 import TalentProfileCard from '@/components/TalentProfileCard';
+import { logError } from '@/lib/logging';
 
 export const metadata = {
   title: 'Marketplace — BuildIsago',
@@ -9,7 +10,8 @@ export const metadata = {
 
 export default async function MarketplacePage() {
   const supabase = await createClient();
-  const { data: talent } = await supabase.rpc('list_public_talent');
+  const { data: talent, error } = await supabase.rpc('list_public_talent');
+  if (error) await logError('marketplace.list_public_talent', error);
 
   return (
     <div className="store-page">
@@ -24,8 +26,12 @@ export default async function MarketplacePage() {
 
         {!talent?.length ? (
           <div className="empty-state">
-            <h3>No public profiles yet</h3>
-            <p>Check back soon, or join the marketplace yourself from your dashboard.</p>
+            <h3>{error ? 'Something went wrong' : 'No public profiles yet'}</h3>
+            <p>
+              {error
+                ? "We couldn't load the marketplace right now — please try again shortly."
+                : 'Check back soon, or join the marketplace yourself from your dashboard.'}
+            </p>
           </div>
         ) : (
           <div className="product-grid">
