@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import { getOrigin } from '@/lib/utils/origin';
 import BrandKitEditor from '@/components/BrandKitEditor';
@@ -10,14 +9,6 @@ export default async function StudioBrandStudioPage({ params }) {
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title')
-    .eq('id', projectId)
-    .single();
-
-  if (!project) notFound();
-
   const { data: brandKit } = await supabase
     .from('project_brand_kits')
     .select('id, project_id, colors, heading_font, body_font, tagline, voice_tone, share_token, updated_at')
@@ -26,10 +17,6 @@ export default async function StudioBrandStudioPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/studio/${projectId}`} className="back-link">
-        &larr; Back to {project.title}
-      </Link>
-
       <div className="page-head">
         <div>
           <h1>Brand Studio</h1>

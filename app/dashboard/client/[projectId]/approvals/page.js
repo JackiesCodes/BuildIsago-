@@ -1,14 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import ApprovalList from '@/components/ApprovalList';
 
 export default async function ClientApprovalsPage({ params }) {
   const { projectId } = await params;
   const { supabase } = await getSessionProfile();
-
-  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).single();
-  if (!project) notFound();
 
   const { data: approvals } = await supabase
     .from('project_approvals')
@@ -19,10 +14,6 @@ export default async function ClientApprovalsPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/client/${projectId}`} className="back-link">
-        &larr; Back to {project.title}
-      </Link>
-
       <div className="page-head">
         <div>
           <h1>Approvals</h1>

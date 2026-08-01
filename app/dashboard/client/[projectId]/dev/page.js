@@ -1,5 +1,3 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import { fetchRepoData } from '@/lib/github';
 import DevScopeEditor from '@/components/DevScopeEditor';
@@ -10,14 +8,6 @@ import RepoPanel from '@/components/RepoPanel';
 export default async function ClientDevStudioPage({ params }) {
   const { projectId } = await params;
   const { supabase } = await getSessionProfile();
-
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title')
-    .eq('id', projectId)
-    .single();
-
-  if (!project) notFound();
 
   const { data: devScope } = await supabase
     .from('project_dev_scopes')
@@ -32,10 +22,6 @@ export default async function ClientDevStudioPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/client/${projectId}`} className="back-link">
-        &larr; Back to {project.title}
-      </Link>
-
       <div className="page-head">
         <div>
           <h1>Dev Studio</h1>

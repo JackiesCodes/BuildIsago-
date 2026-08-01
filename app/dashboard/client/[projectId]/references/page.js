@@ -1,19 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import ReferencesPanel from '@/components/ReferencesPanel';
 
 export default async function ClientReferencesPage({ params }) {
   const { projectId } = await params;
   const { supabase } = await getSessionProfile();
-
-  const { data: project } = await supabase
-    .from('projects')
-    .select('id, title')
-    .eq('id', projectId)
-    .single();
-
-  if (!project) notFound();
 
   const { data: references } = await supabase
     .from('project_references')
@@ -30,10 +20,6 @@ export default async function ClientReferencesPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/client/${projectId}`} className="back-link">
-        &larr; Back to {project.title}
-      </Link>
-
       <div className="page-head">
         <div>
           <h1>References</h1>

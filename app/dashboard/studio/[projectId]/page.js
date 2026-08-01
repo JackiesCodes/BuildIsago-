@@ -1,20 +1,11 @@
-import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import MessageThread from '@/components/MessageThread';
 import FileUploader from '@/components/FileUploader';
-import StatusSelect from '@/components/StatusSelect';
 import ProjectMetaForm from '@/components/ProjectMetaForm';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
-import BrandKitCard from '@/components/BrandKitCard';
-import DevScopeCard from '@/components/DevScopeCard';
-import ReferencesCard from '@/components/ReferencesCard';
-import InvoicesCard from '@/components/InvoicesCard';
-import ApprovalsCard from '@/components/ApprovalsCard';
-import RetainersCard from '@/components/RetainersCard';
-import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectDetail({ params }) {
   const { projectId } = await params;
@@ -23,11 +14,9 @@ export default async function StudioProjectDetail({ params }) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, service_type, status, description, created_at, due_date, priority, ai_draft, ai_draft_generated_at, profiles(full_name, company)')
+    .select('id, description, due_date, priority, ai_draft, ai_draft_generated_at')
     .eq('id', projectId)
     .single();
-
-  if (!project) notFound();
 
   const { data: rawMessages } = await supabase
     .from('messages')
@@ -67,134 +56,55 @@ export default async function StudioProjectDetail({ params }) {
     .eq('project_id', projectId)
     .order('updated_at', { ascending: false });
 
-  const { data: brandKit } = await supabase
-    .from('project_brand_kits')
-    .select('colors, heading_font, body_font, tagline')
-    .eq('project_id', projectId)
-    .maybeSingle();
-
-  const { data: devScope } = await supabase
-    .from('project_dev_scopes')
-    .select('features, repo_owner, repo_name')
-    .eq('project_id', projectId)
-    .maybeSingle();
-
-  const { count: referencesCount } = await supabase
-    .from('project_references')
-    .select('id', { count: 'exact', head: true })
-    .eq('project_id', projectId);
-
-  const { data: invoices } = await supabase
-    .from('project_invoices')
-    .select('id, status, currency, line_items, tax_rate')
-    .eq('project_id', projectId);
-
-  const { data: approvals } = await supabase
-    .from('project_approvals')
-    .select('id, status')
-    .eq('project_id', projectId);
-
-  const { data: retainers } = await supabase
-    .from('project_retainers')
-    .select('id, status, amount, currency, interval')
-    .eq('project_id', projectId);
-
   return (
-    <>
-      <Link href="/dashboard/studio" className="back-link">&larr; Back to all projects</Link>
-
-      <div className="page-head">
-        <div>
-          <h1>{project.title}</h1>
-          <p>
-            {project.profiles?.full_name}
-            {project.profiles?.company ? ` · ${project.profiles.company}` : ''}
-            {' · '}
-            <span className="service-tag">{serviceLabel(project.service_type)}</span>
-          </p>
-        </div>
-        <StatusSelect projectId={project.id} status={project.status} />
+    <div className="detail-grid">
+      <div className="card">
+        <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Conversation</h3>
+        <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
       </div>
 
-      <div className="detail-grid">
+      <div>
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Schedule</h3>
+          <ProjectMetaForm projectId={projectId} dueDate={project?.due_date} priority={project?.priority} />
+        </div>
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
+          <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable />
+        </div>
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
+          <AiDraftPanel projectId={projectId} draft={project?.ai_draft} generatedAt={project?.ai_draft_generated_at} />
+        </div>
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
+          <DesignsList projectId={projectId} designs={designs || []} />
+        </div>
+
         <div className="card">
-          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Conversation</h3>
-          <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
-        </div>
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
+          <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
+            {project?.description}
+          </p>
 
-        <div>
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Schedule</h3>
-            <ProjectMetaForm projectId={project.id} dueDate={project.due_date} priority={project.priority} />
+          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
+          <div className="file-list">
+            {!filesWithUrls.length && (
+              <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
+            )}
+            {filesWithUrls.map((f) => (
+              <div key={f.id} className="file-row">
+                <span>{f.file_name}</span>
+                {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
+              </div>
+            ))}
           </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
-            <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
-            <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Invoices</h3>
-            <InvoicesCard invoicesHref={`/dashboard/studio/${projectId}/invoices`} invoices={invoices || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Approvals</h3>
-            <ApprovalsCard approvalsHref={`/dashboard/studio/${projectId}/approvals`} approvals={approvals || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Retainers</h3>
-            <RetainersCard retainersHref={`/dashboard/studio/${projectId}/retainers`} retainers={retainers || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brand Kit</h3>
-            <BrandKitCard projectId={projectId} brandHref={`/dashboard/studio/${projectId}/brand`} brandKit={brandKit} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
-            <DesignsList projectId={projectId} designs={designs || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>References</h3>
-            <ReferencesCard referencesHref={`/dashboard/studio/${projectId}/references`} count={referencesCount || 0} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Dev Scope</h3>
-            <DevScopeCard projectId={projectId} devHref={`/dashboard/studio/${projectId}/dev`} devScope={devScope} />
-          </div>
-
-          <div className="card">
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-              {project.description}
-            </p>
-
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
-            <div className="file-list">
-              {!filesWithUrls.length && (
-                <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
-              )}
-              {filesWithUrls.map((f) => (
-                <div key={f.id} className="file-row">
-                  <span>{f.file_name}</span>
-                  {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
-                </div>
-              ))}
-            </div>
-            <FileUploader projectId={projectId} />
-          </div>
+          <FileUploader projectId={projectId} />
         </div>
       </div>
-    </>
+    </div>
   );
 }

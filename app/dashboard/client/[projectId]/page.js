@@ -1,21 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
-import StatusBadge from '@/components/StatusBadge';
-import PriorityBadge from '@/components/PriorityBadge';
-import DueDate from '@/components/DueDate';
 import MessageThread from '@/components/MessageThread';
 import FileUploader from '@/components/FileUploader';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
-import BrandKitCard from '@/components/BrandKitCard';
-import DevScopeCard from '@/components/DevScopeCard';
-import ReferencesCard from '@/components/ReferencesCard';
-import InvoicesCard from '@/components/InvoicesCard';
-import ApprovalsCard from '@/components/ApprovalsCard';
-import RetainersCard from '@/components/RetainersCard';
-import { serviceLabel } from '@/lib/constants/services';
 
 export default async function ClientProjectDetail({ params, searchParams }) {
   const { projectId } = await params;
@@ -24,11 +12,9 @@ export default async function ClientProjectDetail({ params, searchParams }) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, service_type, status, description, created_at, due_date, priority, ai_draft, ai_draft_generated_at')
+    .select('id, description, ai_draft, ai_draft_generated_at')
     .eq('id', projectId)
     .single();
-
-  if (!project) notFound();
 
   const { data: rawMessages } = await supabase
     .from('messages')
@@ -68,63 +54,14 @@ export default async function ClientProjectDetail({ params, searchParams }) {
     .eq('project_id', projectId)
     .order('updated_at', { ascending: false });
 
-  const { data: brandKit } = await supabase
-    .from('project_brand_kits')
-    .select('colors, heading_font, body_font, tagline')
-    .eq('project_id', projectId)
-    .maybeSingle();
-
-  const { data: devScope } = await supabase
-    .from('project_dev_scopes')
-    .select('features, repo_owner, repo_name')
-    .eq('project_id', projectId)
-    .maybeSingle();
-
-  const { count: referencesCount } = await supabase
-    .from('project_references')
-    .select('id', { count: 'exact', head: true })
-    .eq('project_id', projectId);
-
-  const { data: invoices } = await supabase
-    .from('project_invoices')
-    .select('id, status, currency, line_items, tax_rate')
-    .eq('project_id', projectId)
-    .neq('status', 'draft');
-
-  const { data: approvals } = await supabase
-    .from('project_approvals')
-    .select('id, status')
-    .eq('project_id', projectId)
-    .neq('status', 'draft');
-
-  const { data: retainers } = await supabase
-    .from('project_retainers')
-    .select('id, status, amount, currency, interval')
-    .eq('project_id', projectId)
-    .neq('status', 'draft');
-
   return (
     <>
-      <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
-
       {setup === 'partial' && (
         <div className="form-error" style={{ marginBottom: 24 }}>
           Your project was created, but we couldn&apos;t set up the milestone checklist
           automatically. Send us a message below and we&apos;ll add it manually.
         </div>
       )}
-
-      <div className="page-head">
-        <div>
-          <h1>{project.title}</h1>
-          <p className="service-tag">{serviceLabel(project.service_type)}</p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <DueDate date={project.due_date} />
-          <PriorityBadge priority={project.priority} />
-          <StatusBadge status={project.status} />
-        </div>
-      </div>
 
       <div className="detail-grid">
         <div className="card">
@@ -140,27 +77,7 @@ export default async function ClientProjectDetail({ params, searchParams }) {
 
           <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
-            <AiDraftPanel projectId={projectId} draft={project.ai_draft} generatedAt={project.ai_draft_generated_at} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Invoices</h3>
-            <InvoicesCard invoicesHref={`/dashboard/client/${projectId}/invoices`} invoices={invoices || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Approvals</h3>
-            <ApprovalsCard approvalsHref={`/dashboard/client/${projectId}/approvals`} approvals={approvals || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Retainers</h3>
-            <RetainersCard retainersHref={`/dashboard/client/${projectId}/retainers`} retainers={retainers || []} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brand Kit</h3>
-            <BrandKitCard projectId={projectId} brandHref={`/dashboard/client/${projectId}/brand`} brandKit={brandKit} />
+            <AiDraftPanel projectId={projectId} draft={project?.ai_draft} generatedAt={project?.ai_draft_generated_at} />
           </div>
 
           <div className="card" style={{ marginBottom: 20 }}>
@@ -168,20 +85,10 @@ export default async function ClientProjectDetail({ params, searchParams }) {
             <DesignsList projectId={projectId} designs={designs || []} />
           </div>
 
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>References</h3>
-            <ReferencesCard referencesHref={`/dashboard/client/${projectId}/references`} count={referencesCount || 0} />
-          </div>
-
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Dev Scope</h3>
-            <DevScopeCard projectId={projectId} devHref={`/dashboard/client/${projectId}/dev`} devScope={devScope} />
-          </div>
-
           <div className="card">
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
             <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-              {project.description}
+              {project?.description}
             </p>
 
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>

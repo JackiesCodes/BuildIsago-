@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import InvoiceList from '@/components/InvoiceList';
 import NewInvoiceButton from '@/components/NewInvoiceButton';
@@ -9,9 +8,6 @@ export default async function StudioInvoicesPage({ params }) {
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
-  const { data: project } = await supabase.from('projects').select('id, title').eq('id', projectId).single();
-  if (!project) notFound();
-
   const { data: invoices } = await supabase
     .from('project_invoices')
     .select('id, invoice_number, status, currency, line_items, tax_rate, due_date, created_at')
@@ -20,10 +16,6 @@ export default async function StudioInvoicesPage({ params }) {
 
   return (
     <>
-      <Link href={`/dashboard/studio/${projectId}`} className="back-link">
-        &larr; Back to {project.title}
-      </Link>
-
       <div className="page-head">
         <div>
           <h1>Invoices</h1>
