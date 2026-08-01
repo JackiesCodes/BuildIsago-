@@ -432,8 +432,8 @@ decision (Sentry, CAPTCHA, Stripe Tax, legal review).
 
 - **Error log** (`error_log` table, Studio → Activity) — every server
   action and the Stripe webhook logs failures here via
-  `lib/logging.js`'s `logError()`, optionally forwarding to Sentry if
-  `SENTRY_DSN` is set.
+  `lib/logging.js`'s `logError()`. Sentry isn't wired in — see
+  `OPERATIONS.md` for why and how to add it properly.
 - **Audit log** (`audit_log` table, Studio → Activity) — who did what:
   role changes, refunds, venture promotions, logged via
   `log_audit_event()`.
@@ -470,9 +470,8 @@ decision (Sentry, CAPTCHA, Stripe Tax, legal review).
   build on every push/PR).
 
 Run `supabase/migrations/017_platform_hardening.sql` (or the updated
-`schema.sql` for a fresh install). New optional environment variable:
-`SENTRY_DSN` (error tracking — omit it and errors still log to the
-in-app `error_log` table).
+`schema.sql` for a fresh install). No new environment variables — errors
+log to the in-app `error_log` table regardless.
 
 ## 21. Deploy
 
@@ -481,10 +480,9 @@ This is a standard Next.js app rooted at the repo root — import the repo in
 override needed) and add the environment variables (Supabase URL, Supabase
 publishable key, `ANTHROPIC_API_KEY`, and — if invoicing or notifications
 are in use — `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
-`SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`,
-`SENTRY_DSN`) in the project's settings. Also set `NEXT_PUBLIC_SITE_URL`
-to the production domain — it's used by `sitemap.xml`, `robots.txt`, and
-Open Graph metadata.
+`SUPABASE_SECRET_KEY`, `RESEND_API_KEY`, `NOTIFICATIONS_FROM_EMAIL`) in
+the project's settings. Also set `NEXT_PUBLIC_SITE_URL` to the production
+domain — it's used by `sitemap.xml`, `robots.txt`, and Open Graph metadata.
 
 ## 22. The marketing site
 

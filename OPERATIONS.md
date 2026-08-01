@@ -40,11 +40,16 @@ real, isolated environment before merging.
 These are genuine gaps, not oversights — each needs an account/decision
 from you, not just code:
 
-- **Error tracking (Sentry).** `lib/logging.js` already checks for
-  `SENTRY_DSN` and will start forwarding errors there the moment it's
-  set — no code change needed, just create a free Sentry project and add
-  the env var. Until then, errors land in the in-app `error_log` table
-  (Studio → Activity).
+- **Error tracking (Sentry).** Not wired in — a first attempt at this
+  used a runtime-checked `import('@sentry/nextjs')` without the package
+  actually installed, which broke the build entirely (webpack resolves
+  dynamic `import()` calls at bundle time regardless of the runtime
+  check around them). To add it properly: `npm install @sentry/nextjs`,
+  then call `Sentry.captureException(...)` directly inside
+  `lib/logging.js`'s `logError()` — a normal top-level import once the
+  package exists is fine, no lazy-loading trick needed. Until then,
+  errors land in the in-app `error_log` table (Studio → Activity), which
+  works regardless.
 - **CAPTCHA / bot protection.** Rate limiting (`check_rate_limit`) covers
   volume-based abuse, but nothing stops a scripted bot from submitting
   one request per window. Adding Cloudflare Turnstile (free) to the
