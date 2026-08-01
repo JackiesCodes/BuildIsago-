@@ -22,7 +22,7 @@ export default function TalentRequestsList({ requests }) {
   }
 
   return (
-    <div className="devscope-list">
+    <div className="scope-list">
       {requests.map((r) => (
         <div key={r.id} className="approval-decision" style={{ marginBottom: 10 }}>
           <span className="approval-decision-label">

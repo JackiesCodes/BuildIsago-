@@ -91,61 +91,95 @@ export default function BrandKitEditor({ brandKit, shareUrl }) {
     }
   }
 
+  const primary = colors[0]?.hex || '#0b8b9e';
+  const secondary = colors[1]?.hex || '#0c1b21';
+
   return (
     <div>
+      {/* The kit composed as a thing, not a set of fields — every edit
+          below lands here, so you can judge the brand instead of
+          imagining it from a form. */}
+      <div className="brand-board" style={{ background: secondary }}>
+        <div className="brand-board-body">
+          <p className="brand-board-tagline" style={{ fontFamily: `'${headingFont}', sans-serif`, color: primary }}>
+            {tagline || 'Your tagline appears here'}
+          </p>
+          <p className="brand-board-copy" style={{ fontFamily: `'${bodyFont}', sans-serif` }}>
+            {voiceTone || 'Set a voice and tone below to see how the brand reads in a sentence.'}
+          </p>
+        </div>
+        <div className="brand-board-ramp" aria-hidden="true">
+          {(colors.length ? colors : [{ hex: '#0b8b9e' }, { hex: '#6ff0ea' }]).map((c, i) => (
+            <span key={i} style={{ background: c.hex }} />
+          ))}
+        </div>
+      </div>
+
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="brand-section-head">
           <h3>Colors</h3>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={addColor}>
-            <IconPlus /> Add color
-          </button>
+          <span className="section-count">{colors.length} {colors.length === 1 ? 'color' : 'colors'}</span>
         </div>
-        <div className="brand-colors-grid">
+        <div className="swatch-grid">
           {colors.map((c, i) => {
             const vsWhite = contrastGrade(contrastRatio(c.hex, '#ffffff'));
             const vsBlack = contrastGrade(contrastRatio(c.hex, '#000000'));
             return (
-              <div className="brand-color-row" key={i}>
-                <input
-                  type="color"
-                  value={c.hex}
-                  onChange={(e) => updateColor(i, 'hex', e.target.value)}
-                  className="brand-color-swatch"
-                />
-                <div className="brand-color-fields">
+              <div className="swatch-card" key={i}>
+                <div className="swatch-well" style={{ background: c.hex }}>
+                  <input
+                    type="color"
+                    value={c.hex}
+                    onChange={(e) => updateColor(i, 'hex', e.target.value)}
+                    aria-label={`${c.name || 'Color'} value`}
+                  />
+                  {/* Legibility read-out sits on the color itself — the pair
+                      it describes is right there, so you judge it in context
+                      instead of mapping a row of mono text back to a chip. */}
+                  <div className="swatch-contrast">
+                    <span className={vsWhite.pass ? 'is-pass' : 'is-fail'} title={`Against white: ${vsWhite.label}`}>
+                      <span className="swatch-contrast-chip" style={{ background: '#fff', color: c.hex }}>A</span>
+                      {vsWhite.label}
+                    </span>
+                    <span className={vsBlack.pass ? 'is-pass' : 'is-fail'} title={`Against black: ${vsBlack.label}`}>
+                      <span className="swatch-contrast-chip" style={{ background: '#000', color: c.hex }}>A</span>
+                      {vsBlack.label}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="swatch-remove"
+                    onClick={() => removeColor(i)}
+                    aria-label={`Remove ${c.name || 'color'}`}
+                  >
+                    <IconTrash />
+                  </button>
+                </div>
+                <div className="swatch-meta">
                   <input
                     type="text"
                     value={c.name}
                     onChange={(e) => updateColor(i, 'name', e.target.value)}
                     placeholder="Color name"
+                    aria-label="Color name"
+                    className="ghost-input swatch-name"
                   />
                   <input
                     type="text"
                     value={c.hex}
                     onChange={(e) => updateColor(i, 'hex', e.target.value)}
-                    className="brand-color-hex"
+                    aria-label="Hex value"
+                    className="ghost-input swatch-hex"
+                    spellCheck={false}
                   />
                 </div>
-                <div className="brand-color-contrast">
-                  <span className={vsWhite.pass ? 'contrast-pass' : 'contrast-fail'}>
-                    vs white: {vsWhite.label}
-                  </span>
-                  <span className={vsBlack.pass ? 'contrast-pass' : 'contrast-fail'}>
-                    vs black: {vsBlack.label}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className="brand-color-remove"
-                  onClick={() => removeColor(i)}
-                  aria-label={`Remove ${c.name}`}
-                >
-                  <IconTrash />
-                </button>
               </div>
             );
           })}
-          {!colors.length && <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No colors yet.</p>}
+          <button type="button" className="swatch-add" onClick={addColor}>
+            <IconPlus />
+            <span>Add color</span>
+          </button>
         </div>
       </div>
 

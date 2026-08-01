@@ -30,7 +30,7 @@ export default function VentureApplicationsList({ applications }) {
   }
 
   return (
-    <div className="devscope-list">
+    <div className="scope-list">
       {applications.map((a) => (
         <div key={a.id} className="approval-decision" style={{ marginBottom: 10 }}>
           <span className="approval-decision-label">

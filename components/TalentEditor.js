@@ -20,16 +20,24 @@ function SpecialtiesEditor({ items, onChange }) {
     onChange(items.filter((_, idx) => idx !== i));
   }
   return (
-    <div className="devscope-list">
+    <div className="scope-list">
       {items.map((item, i) => (
-        <div className="devscope-list-row" key={i}>
-          <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} placeholder="e.g. UI Design, React, Motion Graphics" />
-          <button type="button" onClick={() => removeItem(i)} aria-label="Remove">
+        <div className="scope-row" key={i}>
+          <span className="scope-bullet" aria-hidden="true" />
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => updateItem(i, e.target.value)}
+            placeholder="e.g. UI Design, React, Motion Graphics"
+            className="ghost-input"
+            aria-label={`Specialty ${i + 1}`}
+          />
+          <button type="button" className="scope-remove" onClick={() => removeItem(i)} aria-label="Remove">
             <IconTrash />
           </button>
         </div>
       ))}
-      <button type="button" className="btn btn-ghost btn-sm" onClick={addItem}>
+      <button type="button" className="scope-add" onClick={addItem}>
         <IconPlus /> Add specialty
       </button>
     </div>

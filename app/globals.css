@@ -209,10 +209,6 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
 .status-select,
 .design-title-input,
 .devscope-repo-form input,
-.devscope-list-row input,
-.devscope-pair-row input,
-.brand-color-fields input,
-.brand-color-swatch,
 .settings-row select,
 .theme-picker-option,
 input[type='color'] {
@@ -221,18 +217,13 @@ input[type='color'] {
 .meta-field input:hover:not(:disabled, :focus), .meta-field select:hover:not(:disabled, :focus),
 .status-select:hover:not(:disabled, :focus),
 .devscope-repo-form input:hover:not(:disabled, :focus),
-.devscope-list-row input:hover:not(:disabled, :focus),
-.devscope-pair-row input:hover:not(:disabled, :focus),
-.brand-color-fields input:hover:not(:disabled, :focus) {
+.devscope-repo-form input:hover:not(:disabled, :focus) {
   border-color: var(--border-strong);
 }
 .meta-field input:focus, .meta-field select:focus,
 .status-select:focus,
 .design-title-input:focus,
 .devscope-repo-form input:focus,
-.devscope-list-row input:focus,
-.devscope-pair-row input:focus,
-.brand-color-fields input:focus,
 input[type='color']:focus-visible {
   outline: none;
   border-color: var(--accent-ink);
@@ -1175,56 +1166,177 @@ input[type='color']:focus-visible {
 .brand-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .brand-section-head h3 { font-family: var(--font-display); margin: 0; }
 
-.brand-colors-grid { display: flex; flex-direction: column; gap: 10px; }
-.brand-color-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  transition: border-color 0.15s ease;
+.section-count { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-2); }
+
+/* Brand board — the composed artifact. Deliberately not a .card: it
+   renders in the brand's own colors, so it must not inherit app chrome. */
+.brand-board {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-md);
 }
-.brand-color-row:hover { border-color: var(--border-strong); }
-.brand-color-swatch {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: none;
-  padding: 3px;
-  cursor: pointer;
+.brand-board-body { padding: 40px 36px 32px; }
+.brand-board-tagline {
+  font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 14px;
 }
-.brand-color-fields { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-.brand-color-fields input {
-  border: 1px solid var(--border);
-  background: var(--surface);
+.brand-board-copy {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  margin: 0;
+  max-width: 60ch;
+}
+.brand-board-ramp { display: flex; height: 10px; }
+/* Same reasoning as .swatch-well: a ramp segment matching the board
+   behind it would otherwise read as a gap in the ramp. */
+.brand-board-ramp span { flex: 1; box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35); }
+
+/* Ghost input: reads as text until you reach for it. Used wherever the
+   value itself is the content (a color name, a feature) rather than a
+   form field to be filled in — a page of bordered boxes reads as a
+   database form, not a design tool. */
+.ghost-input {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--ink);
   border-radius: 6px;
-  padding: 6px 9px;
-  font-size: 0.85rem;
+  padding: 6px 8px;
+  font-size: 0.88rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-.brand-color-hex { font-family: var(--font-mono); text-transform: uppercase; }
-.brand-color-contrast { display: flex; flex-direction: column; gap: 4px; font-size: 0.72rem; font-family: var(--font-mono); white-space: nowrap; flex-shrink: 0; }
-.contrast-pass { color: var(--accent-ink); }
-.contrast-fail { color: var(--danger); }
-.brand-color-remove {
+.ghost-input:hover:not(:focus) { background: var(--surface-2); border-color: var(--border); }
+.ghost-input:focus {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 3px rgba(44, 198, 211, 0.15);
+}
+.ghost-input::placeholder { color: var(--muted-2); }
+
+/* Colors: the palette is the artifact, so it gets the space. Cards sit
+   in a grid you can read as a palette at a glance, rather than stacked
+   full-width rows that can only be compared by scrolling. */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+.swatch-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.swatch-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.swatch-well {
+  position: relative;
+  height: 104px;
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  /* A mid-grey inset ring reads against both white and black, so a brand
+     colour close to the surrounding UI (a near-black ink in dark mode,
+     a near-white in light) still reads as a distinct chip instead of
+     dissolving into the card. */
+  box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.4);
+}
+/* The whole color area is the picker — clicking the color to change the
+   color is the obvious gesture. */
+.swatch-well input[type='color'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.swatch-well input[type='color']:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent-ink-strong);
+  outline-offset: -3px;
+  mix-blend-mode: normal;
+  background: transparent;
+}
+.swatch-contrast {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  pointer-events: none;
+}
+.swatch-contrast span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0c1b21;
+}
+.swatch-contrast .is-fail { background: rgba(255, 255, 255, 0.92); color: #9b1c1c; }
+.swatch-contrast-chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.6rem;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.swatch-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
   border: none;
-  background: transparent;
-  color: var(--muted-2);
-  border-radius: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #7a2222;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
-.brand-color-remove:hover { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
-.brand-color-remove svg { width: 15px; height: 15px; }
+.swatch-card:hover .swatch-remove,
+.swatch-remove:focus-visible { opacity: 1; }
+.swatch-remove svg { width: 14px; height: 14px; }
+.swatch-meta { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.swatch-name { font-weight: 500; }
+.swatch-hex { font-family: var(--font-mono); text-transform: uppercase; font-size: 0.78rem; color: var(--muted); }
+.swatch-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 160px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.swatch-add:hover { border-color: var(--accent-ink); color: var(--accent-ink); background: var(--surface-2); }
+.swatch-add svg { width: 20px; height: 20px; }
+
+.contrast-pass { color: var(--accent-ink); }
+.contrast-fail { color: var(--danger); }
 
 .brand-font-preview { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; background: var(--surface-2); }
 .brand-font-preview-heading { font-size: 1.8rem; font-weight: 600; margin-bottom: 10px; color: var(--ink); }
@@ -1296,40 +1408,78 @@ input[type='color']:focus-visible {
 .devscope-section:last-of-type { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
 .devscope-section h4 { font-family: var(--font-display); font-size: 0.95rem; margin-bottom: 12px; }
 
-.devscope-list { display: flex; flex-direction: column; gap: 8px; }
-.devscope-list-row, .devscope-pair-row {
+/* Scope lists: the value is the content, so it reads as a list you can
+   scan — not a stack of identical input boxes. Chrome appears on hover
+   and focus instead of being painted permanently. */
+.scope-list { display: flex; flex-direction: column; gap: 2px; }
+.scope-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-.devscope-list-row input, .devscope-pair-row input {
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--ink);
+  gap: 10px;
   border-radius: var(--radius-sm);
-  padding: 9px 11px;
-  font-size: 0.85rem;
-  flex: 1;
-  min-width: 0;
 }
-.devscope-pair-a { flex: 0 0 34% !important; }
-.devscope-pair-b { flex: 1 !important; }
-.devscope-list-row button, .devscope-pair-row button {
+.scope-row > .ghost-input { flex: 1; min-width: 0; }
+.scope-bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--muted-2);
+  flex-shrink: 0;
+  margin-left: 7px;
+}
+.scope-step {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+.scope-pair-fields { display: flex; gap: 8px; flex: 1; min-width: 0; align-items: center; }
+.scope-pair-a { flex: 0 0 32%; font-weight: 500; }
+.scope-pair-b { flex: 1; min-width: 0; color: var(--muted); }
+.scope-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   border: none;
   background: transparent;
   color: var(--muted-2);
   border-radius: 6px;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
-.devscope-list-row button:hover, .devscope-pair-row button:hover { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
-.devscope-list-row svg, .devscope-pair-row svg { width: 15px; height: 15px; }
-.devscope-list > .btn { align-self: flex-start; margin-top: 4px; }
+.scope-row:hover .scope-remove,
+.scope-remove:focus-visible { opacity: 1; }
+.scope-remove:hover { background: rgba(239, 106, 106, 0.15); color: var(--danger); }
+.scope-remove svg { width: 15px; height: 15px; }
+.scope-add {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.83rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.scope-add:hover { background: var(--surface-2); color: var(--accent-ink); }
+.scope-add svg { width: 15px; height: 15px; }
 
 .devscope-repo-form { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
 .devscope-repo-form input {
@@ -1638,9 +1788,13 @@ input[type='color']:focus-visible {
 
 @media (max-width: 1000px) {
   .devscope-repo-columns { grid-template-columns: 1fr; }
-  .devscope-pair-row { flex-wrap: wrap; align-items: flex-start; }
-  .devscope-pair-a, .devscope-pair-b { flex: 1 1 100% !important; }
-  .devscope-pair-row button { margin-left: auto; }
+  /* Name and description stack rather than fighting for a 34/66 split. */
+  .scope-pair-fields { flex-direction: column; align-items: stretch; gap: 2px; }
+  .scope-pair-a, .scope-pair-b { flex: 1 1 auto; }
+  .scope-row-pair { align-items: flex-start; }
+  .scope-row-pair .scope-step, .scope-row-pair .scope-bullet { margin-top: 8px; }
+  /* No hover on touch — keep remove reachable. */
+  .scope-remove { opacity: 1; }
   .stats-row { grid-template-columns: repeat(3, 1fr); }
   .kanban-board { grid-template-columns: 1fr 1fr; }
 }
@@ -1753,10 +1907,12 @@ input[type='color']:focus-visible {
 
   /* Brand Studio: stack each color row instead of cramming swatch,
      name, hex, and contrast labels into one line. */
-  .brand-color-row { flex-wrap: wrap; row-gap: 10px; }
-  .brand-color-fields { order: 2; flex: 1 1 100%; }
-  .brand-color-contrast { order: 3; flex: 1 1 100%; flex-direction: row; gap: 16px; }
-  .brand-color-remove { margin-left: auto; }
+  .swatch-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  /* Remove stays visible on touch — there is no hover to reveal it. */
+  .swatch-remove { opacity: 1; }
+  /* Heading and its action stop competing for one line and stack. */
+  .brand-section-head { flex-wrap: wrap; }
+  .brand-section-head h3 { flex: 1 1 100%; }
 
   /* Invoices: stack the meta fields and let each line item wrap into two rows
      instead of squeezing five columns into a narrow viewport. */

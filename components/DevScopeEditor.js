@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { updateDevScope, generateDevScopeDraft } from '@/lib/actions/devScope';
 import { IconPlus, IconSparkles, IconTrash } from './icons';
 
-function StringListEditor({ items, onChange, placeholder }) {
+function StringListEditor({ items, onChange, placeholder, label }) {
   function updateItem(i, value) {
     onChange(items.map((it, idx) => (idx === i ? value : it)));
   }
@@ -15,23 +15,31 @@ function StringListEditor({ items, onChange, placeholder }) {
     onChange(items.filter((_, idx) => idx !== i));
   }
   return (
-    <div className="devscope-list">
+    <div className="scope-list">
       {items.map((item, i) => (
-        <div className="devscope-list-row" key={i}>
-          <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} placeholder={placeholder} />
-          <button type="button" onClick={() => removeItem(i)} aria-label="Remove">
+        <div className="scope-row" key={i}>
+          <span className="scope-bullet" aria-hidden="true" />
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => updateItem(i, e.target.value)}
+            placeholder={placeholder}
+            className="ghost-input"
+            aria-label={label ? `${label} ${i + 1}` : undefined}
+          />
+          <button type="button" className="scope-remove" onClick={() => removeItem(i)} aria-label="Remove">
             <IconTrash />
           </button>
         </div>
       ))}
-      <button type="button" className="btn btn-ghost btn-sm" onClick={addItem}>
+      <button type="button" className="scope-add" onClick={addItem}>
         <IconPlus /> Add
       </button>
     </div>
   );
 }
 
-function PairListEditor({ items, onChange, fieldA, fieldB, placeholderA, placeholderB }) {
+function PairListEditor({ items, onChange, fieldA, fieldB, placeholderA, placeholderB, numbered }) {
   function updateItem(i, field, value) {
     onChange(items.map((it, idx) => (idx === i ? { ...it, [field]: value } : it)));
   }
@@ -42,29 +50,38 @@ function PairListEditor({ items, onChange, fieldA, fieldB, placeholderA, placeho
     onChange(items.filter((_, idx) => idx !== i));
   }
   return (
-    <div className="devscope-list">
+    <div className="scope-list">
       {items.map((item, i) => (
-        <div className="devscope-pair-row" key={i}>
-          <input
-            type="text"
-            value={item[fieldA] || ''}
-            onChange={(e) => updateItem(i, fieldA, e.target.value)}
-            placeholder={placeholderA}
-            className="devscope-pair-a"
-          />
-          <input
-            type="text"
-            value={item[fieldB] || ''}
-            onChange={(e) => updateItem(i, fieldB, e.target.value)}
-            placeholder={placeholderB}
-            className="devscope-pair-b"
-          />
-          <button type="button" onClick={() => removeItem(i)} aria-label="Remove">
+        <div className="scope-row scope-row-pair" key={i}>
+          {numbered ? (
+            <span className="scope-step" aria-hidden="true">{i + 1}</span>
+          ) : (
+            <span className="scope-bullet" aria-hidden="true" />
+          )}
+          <div className="scope-pair-fields">
+            <input
+              type="text"
+              value={item[fieldA] || ''}
+              onChange={(e) => updateItem(i, fieldA, e.target.value)}
+              placeholder={placeholderA}
+              className="ghost-input scope-pair-a"
+              aria-label={placeholderA}
+            />
+            <input
+              type="text"
+              value={item[fieldB] || ''}
+              onChange={(e) => updateItem(i, fieldB, e.target.value)}
+              placeholder={placeholderB}
+              className="ghost-input scope-pair-b"
+              aria-label={placeholderB}
+            />
+          </div>
+          <button type="button" className="scope-remove" onClick={() => removeItem(i)} aria-label="Remove">
             <IconTrash />
           </button>
         </div>
       ))}
-      <button type="button" className="btn btn-ghost btn-sm" onClick={addItem}>
+      <button type="button" className="scope-add" onClick={addItem}>
         <IconPlus /> Add
       </button>
     </div>
@@ -128,7 +145,12 @@ export default function DevScopeEditor({ devScope }) {
 
       <div className="devscope-section">
         <h4>Features</h4>
-        <StringListEditor items={features} onChange={setFeatures} placeholder="e.g. Users can reset their password via email" />
+        <StringListEditor
+          items={features}
+          onChange={setFeatures}
+          placeholder="e.g. Users can reset their password via email"
+          label="Feature"
+        />
       </div>
 
       <div className="devscope-section">
@@ -152,12 +174,18 @@ export default function DevScopeEditor({ devScope }) {
           fieldB="description"
           placeholderA="Phase"
           placeholderB="What happens"
+          numbered
         />
       </div>
 
       <div className="devscope-section" style={{ marginBottom: 0 }}>
         <h4>Risks &amp; open questions</h4>
-        <StringListEditor items={risks} onChange={setRisks} placeholder="e.g. Needs a decision on hosting region" />
+        <StringListEditor
+          items={risks}
+          onChange={setRisks}
+          placeholder="e.g. Needs a decision on hosting region"
+          label="Risk"
+        />
       </div>
 
       {error && <div className="form-error" style={{ marginTop: 16 }}>{error}</div>}
