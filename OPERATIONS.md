@@ -23,9 +23,20 @@ Recovery drill checklist (do this once, before you need it for real):
 Supabase branching (a full copy of the schema, isolated from production
 data) is the natural staging setup here — every migration in
 `supabase/migrations/` applies cleanly to a branch the same way it does
-to production. **This has a real recurring cost** (~$0.0134/hour per
-branch, roughly $9–10/month if left running continuously) — it wasn't
-created automatically for that reason. To set one up:
+to production.
+
+Two costs gate this, and neither was incurred automatically:
+
+1. **Branching requires the Pro plan.** The `JackiesCodes's Org`
+   organization is currently on Free, and the API rejects branch
+   creation outright (`PaymentRequiredException: Branching is supported
+   only on the Pro plan or above`). Pro is $25/month, and the plan can
+   only be changed from the Supabase dashboard — not via API.
+2. **The branch itself bills hourly** (~$0.0134/hour, roughly
+   $9–10/month if left running continuously), on top of the Pro base.
+
+So the realistic all-in cost is ~$35/month. To set one up once the org
+is on Pro:
 
 ```
 mcp__Supabase__create_branch (or, from the dashboard: Project → Branches → New branch)
@@ -88,6 +99,15 @@ from you, not just code:
   events (alongside the existing `checkout.session.completed`,
   `customer.subscription.updated`, `customer.subscription.deleted`) —
   the webhook code already handles it, it just isn't subscribed yet.
+
+  Easiest route is the dashboard, since it avoids any question of which
+  Stripe account a connector/CLI is authenticated against: Stripe
+  Dashboard → Developers → Webhooks → select the BuildIsago endpoint →
+  "Update details"/"Select events" → check `charge.refunded` → save.
+  Verify with Send test webhook → `charge.refunded`, then confirm a row
+  landed in `audit_log`. Make sure you're in the correct account (the
+  one that owns the BuildIsago endpoint) and the right mode (test vs.
+  live) before saving — the account switcher is top-left.
 - Basic RBAC: a studio account can be a "member" (`is_owner = false`)
   with full day-to-day visibility but no ability to create/edit/delete
   invoices, retainers, or ventures. Set via the dashboard, same as the
