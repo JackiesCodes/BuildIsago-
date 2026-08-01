@@ -11,15 +11,22 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #060b10;
-  --bg-alt: #0a121a;
-  --surface: #0d1620;
-  --surface-2: #111c28;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --ink: #eef6f8;
-  --muted: #93a9b4;
-  --muted-2: #5e7480;
+  /* Near-neutral with only a whisper of the brand hue. The old darks
+     were distinctly blue (#060b10), which reads as a 2021 SaaS product;
+     calmer neutrals let the teal accent do the identifying work instead
+     of the background competing with it. */
+  --bg: #08090b;
+  --bg-alt: #0c0e11;
+  --surface: #111316;
+  --surface-2: #17191d;
+  /* Hairline chrome: surfaces separate by tone, not by drawn lines. */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --ink: #ecedef;
+  --muted: #9b9fa6;
+  /* Lifted from #6b7078, which measured 3.7:1 on surfaces and failed AA
+     for the small labels this token is used on throughout the app. */
+  --muted-2: #7d838c;
 
   --teal-600: #0b8b9e;
   --teal-500: #12a7bb;
@@ -28,29 +35,33 @@
 
   --accent-ink: var(--teal-400);
   --accent-ink-strong: var(--cyan-300);
+  --accent-soft: rgba(44, 198, 211, 0.12);
 
   --danger: #ef6a6a;
   --danger-strong: #ff9d9d;
   --warning: #e8b46f;
   --shadow-color: rgba(0, 0, 0, 0.6);
 
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 2px 10px -2px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 14px 34px -10px rgba(0, 0, 0, 0.55), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  /* Diffuse and low-contrast rather than tight and dark — depth reads as
+     ambient light, not as a drop shadow sitting under a box. */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 10px 28px -16px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.3), 0 18px 48px -20px rgba(0, 0, 0, 0.7);
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg: #f3f7f9;
-  --bg-alt: #e9f1f3;
+  --bg: #fafbfb;
+  --bg-alt: #f4f6f7;
   --surface: #ffffff;
-  --surface-2: #eef4f6;
-  --border: rgba(11, 29, 36, 0.12);
-  --border-strong: rgba(11, 29, 36, 0.22);
-  --ink: #0c1b21;
-  --muted: #3f5b66;
-  --muted-2: #587480;
+  --surface-2: #f5f7f8;
+  --border: rgba(14, 25, 31, 0.08);
+  --border-strong: rgba(14, 25, 31, 0.16);
+  --ink: #14181c;
+  --muted: #566068;
+  /* Darkened from #7d868f for the same AA reason as the dark theme. */
+  --muted-2: #656e78;
 
   --teal-600: #0b8b9e;
   --teal-500: #12a7bb;
@@ -59,15 +70,16 @@
 
   --accent-ink: #0d7e8f;
   --accent-ink-strong: #086573;
+  --accent-soft: rgba(13, 126, 143, 0.09);
 
   --danger: #b91c1c;
   --danger-strong: #7f1d1d;
   --warning: #92400e;
-  --shadow-color: rgba(20, 40, 55, 0.14);
+  --shadow-color: rgba(20, 40, 55, 0.12);
 
-  --shadow-xs: 0 1px 2px rgba(20, 40, 55, 0.05);
-  --shadow-sm: 0 2px 10px -2px rgba(20, 40, 55, 0.09), 0 1px 2px rgba(20, 40, 55, 0.05);
-  --shadow-md: 0 14px 34px -10px rgba(20, 40, 55, 0.16), 0 2px 8px -2px rgba(20, 40, 55, 0.07);
+  --shadow-xs: 0 1px 2px rgba(20, 40, 55, 0.04);
+  --shadow-sm: 0 1px 2px rgba(20, 40, 55, 0.05), 0 8px 24px -16px rgba(20, 40, 55, 0.18);
+  --shadow-md: 0 2px 6px rgba(20, 40, 55, 0.06), 0 18px 44px -22px rgba(20, 40, 55, 0.26);
 }
 
 :root {
@@ -77,20 +89,38 @@
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  /* Tighter than before (was 10/16/24). Precise corners read as
+     technical; large ones read as consumer-friendly. */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
 }
 
 * { box-sizing: border-box; }
 html, body { padding: 0; margin: 0; }
 
+/* A low-intensity wash of brand light behind the whole app. Layered
+   into the background shorthand with attachment: fixed rather than a
+   negative-z-index pseudo-element, so it can't be hidden by background
+   propagation from body to the canvas or by a child stacking context. */
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(70% 55% at 12% -8%, rgba(44, 198, 211, 0.10), transparent 60%),
+    radial-gradient(55% 45% at 95% 4%, rgba(111, 240, 234, 0.06), transparent 62%),
+    var(--bg);
+  background-attachment: fixed, fixed, fixed;
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(70% 55% at 12% -8%, rgba(13, 126, 143, 0.08), transparent 60%),
+    radial-gradient(55% 45% at 95% 4%, rgba(18, 167, 187, 0.06), transparent 62%),
+    var(--bg);
+  background-attachment: fixed, fixed, fixed;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -108,9 +138,17 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   align-items: center;
   justify-content: center;
   padding: 24px;
+  /* Same wash as the app shell, at the same intensity — auth used a
+     stronger gradient and read as a different product on arrival. */
   background:
-    radial-gradient(circle at 15% 10%, rgba(44, 198, 211, 0.12), transparent 45%),
-    radial-gradient(circle at 85% 90%, rgba(111, 240, 234, 0.08), transparent 45%),
+    radial-gradient(70% 55% at 12% -8%, rgba(44, 198, 211, 0.10), transparent 60%),
+    radial-gradient(55% 45% at 95% 4%, rgba(111, 240, 234, 0.06), transparent 62%),
+    var(--bg);
+}
+:root[data-theme='light'] .auth-shell {
+  background:
+    radial-gradient(70% 55% at 12% -8%, rgba(13, 126, 143, 0.08), transparent 60%),
+    radial-gradient(55% 45% at 95% 4%, rgba(18, 167, 187, 0.06), transparent 62%),
     var(--bg);
 }
 .auth-card {
@@ -119,8 +157,8 @@ button, input, textarea, select { font-family: inherit; font-size: inherit; colo
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 40px;
-  box-shadow: 0 24px 60px -24px var(--shadow-color);
+  padding: 36px;
+  box-shadow: var(--shadow-md);
 }
 .auth-brand {
   display: flex;
@@ -255,25 +293,33 @@ input[type='color']:focus-visible {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.92rem;
-  padding: 13px 22px;
-  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: -0.005em;
+  padding: 11px 18px;
+  /* Rounded rect, not a pill. Pills read as marketing CTAs; software
+     tools use restrained corners so buttons sit level with inputs. */
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, color 0.15s ease;
   width: 100%;
 }
-.btn-primary { background: var(--gradient-brand); color: #04141c; box-shadow: 0 12px 30px -12px rgba(44, 198, 211, 0.5); }
-.btn-primary:hover:not(:disabled) { box-shadow: 0 16px 34px -12px rgba(44, 198, 211, 0.65); transform: translateY(-1px); }
-.btn-primary:active:not(:disabled) { transform: translateY(0); box-shadow: 0 8px 20px -10px rgba(44, 198, 211, 0.55); }
-.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-.btn-ghost { background: var(--surface-2); border-color: var(--border); color: var(--ink); width: auto; box-shadow: var(--shadow-xs); }
-.btn-ghost:hover:not(:disabled) { border-color: var(--accent-ink); color: var(--accent-ink-strong); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-.btn-ghost:active:not(:disabled) { transform: translateY(0); box-shadow: var(--shadow-xs); }
-.btn-ghost:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
-.btn-sm { padding: 9px 16px; font-size: 0.85rem; width: auto; }
+/* Solid accent rather than a gradient slab with a coloured glow. The
+   glow drew more attention than the label and dated the whole app; a
+   flat fill plus a lift on hover is quieter and easier to scan. */
+/* Dark ink on the accent, not white: white on teal-600 measures 3.9:1,
+   which fails AA for label-sized text. */
+.btn-primary { background: var(--teal-500); color: #04141c; }
+.btn-primary:hover:not(:disabled) { background: var(--teal-400); }
+.btn-primary:active:not(:disabled) { background: var(--teal-500); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--ink); width: auto; }
+.btn-ghost:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border-strong); color: var(--ink); }
+.btn-ghost:active:not(:disabled) { background: var(--surface-2); }
+.btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-sm { padding: 7px 13px; font-size: 0.84rem; width: auto; }
 .btn-danger { background: transparent; border-color: rgba(239, 106, 106, 0.4); color: var(--danger); width: auto; box-shadow: none; }
 .btn-danger:hover:not(:disabled) { background: rgba(239, 106, 106, 0.1); }
 
@@ -303,9 +349,10 @@ input[type='color']:focus-visible {
    viewport-height; overflow-y: auto only kicks in if the nav list itself
    ever gets long enough to need its own internal scroll. */
 .sidebar {
-  background: var(--bg-alt);
+  /* Transparent so the ambient wash runs unbroken across the shell —
+     a solid panel here cut the app into visible slabs. */
+  background: transparent;
   border-right: 1px solid var(--border);
-  box-shadow: 2px 0 16px -8px var(--shadow-color);
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -414,10 +461,9 @@ input[type='color']:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 28px;
+  padding: 14px 28px;
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 16px -8px var(--shadow-color);
-  background: var(--bg-alt);
+  background: transparent;
   flex-shrink: 0;
   z-index: 10;
 }
@@ -608,8 +654,10 @@ input[type='color']:focus-visible {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 30px;
-  box-shadow: var(--shadow-sm);
+  padding: 26px;
+  /* No drop shadow by default — a page of shadowed boxes reads as
+     stacked panels. Tone alone separates the card from the page. */
+  box-shadow: none;
 }
 /* Section headers inside a card share one bolder baseline size instead of
    falling back to the browser's default h3/h4 rendering — components only
@@ -1141,13 +1189,13 @@ input[type='color']:focus-visible {
      not read as a page. Every canvas editor darkens the surround for
      this reason. */
   background:
-    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
-    #1b2530;
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.035), transparent 60%),
+    #191b1f;
 }
 :root[data-theme='light'] .design-canvas-wrap {
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5), transparent 60%),
-    #c3ced6;
+    #c8cbcf;
 }
 .design-artboard { position: relative; flex: none; }
 .design-artboard canvas {
