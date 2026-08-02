@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NAV, SETTINGS_ITEM } from '@/lib/constants/nav';
+import { NAV, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
+import NavProjectsDisclosure from './NavProjectsDisclosure';
 import { IconLogOut, IconPlus, IconSettings } from './icons';
 import { applyPreference, getPreference, THEME_EVENT } from '@/lib/theme';
 
@@ -13,7 +14,7 @@ const THEMES = [
   { value: 'system', label: 'System' },
 ];
 
-export default function MobileNav({ role, name, email, homeHref, signOutAction }) {
+export default function MobileNav({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pref, setPref] = useState(null);
@@ -109,6 +110,21 @@ export default function MobileNav({ role, name, email, homeHref, signOutAction }
             <ul className="mobile-drawer-nav">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                if (item.href === PROJECTS_HREF[role]) {
+                  return (
+                    <NavProjectsDisclosure
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={Icon}
+                      projects={projects}
+                      hasMore={hasMoreProjects}
+                      pathname={pathname}
+                      active={item.href === activeHref}
+                      onNavigate={() => setOpen(false)}
+                    />
+                  );
+                }
                 return (
                   <li key={item.href}>
                     <Link href={item.href} className={item.href === activeHref ? 'active' : ''}>

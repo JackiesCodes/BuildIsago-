@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
+import { NAV_PROJECT_LIMIT } from '@/lib/constants/nav';
 import { signOut } from '@/lib/actions/auth';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
@@ -7,11 +8,23 @@ import MobileNav from '@/components/MobileNav';
 import CommandPalette from '@/components/CommandPalette';
 
 export default async function DashboardLayout({ children }) {
-  const { user, profile } = await getSessionProfile();
+  const { user, profile, supabase } = await getSessionProfile();
   if (!user) redirect('/login');
 
   const role = profile?.role === 'studio' ? 'studio' : 'client';
   const homeHref = role === 'studio' ? '/dashboard/studio' : '/dashboard/client';
+
+  // Recent projects for the nav disclosure. Fetch one past the limit so
+  // we know whether to offer "View all" without a second count query.
+  // RLS already scopes clients to their own rows; studio sees all.
+  const { data: navProjectRows } = await supabase
+    .from('projects')
+    .select('id, title')
+    .order('created_at', { ascending: false })
+    .limit(NAV_PROJECT_LIMIT + 1);
+
+  const navProjects = (navProjectRows || []).slice(0, NAV_PROJECT_LIMIT);
+  const hasMoreProjects = (navProjectRows || []).length > NAV_PROJECT_LIMIT;
 
   return (
     <div className="app-shell">
@@ -21,6 +34,8 @@ export default async function DashboardLayout({ children }) {
         email={user.email}
         homeHref={homeHref}
         signOutAction={signOut}
+        projects={navProjects}
+        hasMoreProjects={hasMoreProjects}
       />
       <MobileNav
         role={role}
@@ -28,6 +43,8 @@ export default async function DashboardLayout({ children }) {
         email={user.email}
         homeHref={homeHref}
         signOutAction={signOut}
+        projects={navProjects}
+        hasMoreProjects={hasMoreProjects}
       />
       <div className="app-body">
         <TopBar homeHref={homeHref} />

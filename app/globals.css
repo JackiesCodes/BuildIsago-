@@ -563,6 +563,55 @@ input[type='color']:focus-visible {
 .command-list button.active { background: var(--surface-2); }
 .command-list button.active svg { color: var(--accent-ink-strong); }
 
+/* Projects disclosure — shared by the sidebar and the mobile drawer, so
+   sizing comes from whichever nav it sits in rather than being fixed. */
+.nav-disclosure-row { display: flex; align-items: center; }
+.nav-disclosure-row > a { flex: 1; min-width: 0; }
+.nav-disclosure-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  margin-right: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav-disclosure-toggle svg { width: 14px; height: 14px; transition: transform 0.15s ease; }
+.nav-disclosure-toggle.open svg { transform: rotate(180deg); }
+.nav-disclosure-toggle:hover { background: var(--surface-2); color: var(--ink); }
+
+.nav-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 6px;
+  /* Indent under the parent icon, with a rail so the nesting reads at a
+     glance rather than relying on indentation alone. */
+  padding-left: 25px;
+  border-left: 1px solid var(--border);
+  margin-left: 17px;
+}
+.nav-project-list a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 0.83rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-project-list a:hover { background: var(--surface-2); color: var(--ink); }
+.nav-project-list a.active { background: var(--accent-soft); color: var(--accent-ink-strong); }
+.nav-project-more { font-family: var(--font-mono); font-size: 0.74rem !important; color: var(--muted-2) !important; }
+.nav-project-empty { padding: 7px 10px; font-size: 0.8rem; color: var(--muted-2); }
+
 /* Profile menu (sidebar footer) */
 .profile-menu { position: relative; width: 100%; }
 .profile-trigger {
@@ -2093,6 +2142,14 @@ input[type='color']:focus-visible {
   }
   .sidebar-cta { padding: 11px; }
   .sidebar-nav li a { justify-content: center; }
+  /* Icon-only sidebar: there is no room for a disclosure chevron or a
+     list of project titles, and the labels are clipped anyway. The full
+     list is still one click away on the Projects page.
+     Scoped to .sidebar — this breakpoint also covers phone widths, where
+     the same rule would otherwise hide the disclosure inside the mobile
+     drawer, which is the one place it matters most. */
+  .sidebar .nav-disclosure-toggle,
+  .sidebar .nav-project-list { display: none; }
   .sidebar-user { justify-content: center; }
   .topbar { padding: 14px 20px; }
   .topbar-search kbd { display: none; }

@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconPlus, IconSettings } from './icons';
-import { NAV, SETTINGS_ITEM } from '@/lib/constants/nav';
+import { NAV, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
 import ProfileMenu from './ProfileMenu';
+import NavProjectsDisclosure from './NavProjectsDisclosure';
 
-export default function Sidebar({ role, name, email, homeHref, signOutAction }) {
+export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false }) {
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
 
@@ -40,6 +41,20 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
           {navItems.map((item) => {
             const active = item.href === activeHref;
             const Icon = item.icon;
+            if (item.href === PROJECTS_HREF[role]) {
+              return (
+                <NavProjectsDisclosure
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  icon={Icon}
+                  projects={projects}
+                  hasMore={hasMoreProjects}
+                  pathname={pathname}
+                  active={active}
+                />
+              );
+            }
             return (
               <li key={item.href}>
                 <Link href={item.href} className={active ? 'active' : ''}>
