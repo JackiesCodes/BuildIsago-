@@ -1,15 +1,8 @@
 import Link from 'next/link';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusBadge from '@/components/StatusBadge';
-import { IconArrowRight, IconCode, IconLayers, IconPalette, IconPenTool } from '@/components/icons';
+import QuickStartCard from '@/components/QuickStartCard';
 import { SERVICES, serviceLabel } from '@/lib/constants/services';
-
-const SERVICE_ICONS = {
-  software: IconCode,
-  branding: IconPalette,
-  design: IconPenTool,
-  multiple: IconLayers,
-};
 
 export default async function ClientDashboard({ searchParams }) {
   const { q } = await searchParams;
@@ -35,21 +28,15 @@ export default async function ClientDashboard({ searchParams }) {
 
       {!q && (
         <div className="quick-start-grid">
-          {SERVICES.map(({ value, label, description }) => {
-            const Icon = SERVICE_ICONS[value];
-            return (
-              <Link key={value} href={`/dashboard/client/new?service=${value}`} className="quick-start-card">
-                <span className="quick-start-icon">
-                  <Icon />
-                </span>
-                <span className="quick-start-title">{label}</span>
-                <span className="quick-start-desc">{description}</span>
-                <span className="quick-start-go">
-                  Start <IconArrowRight />
-                </span>
-              </Link>
-            );
-          })}
+          {SERVICES.map(({ value, label, description }) => (
+            <QuickStartCard
+              key={value}
+              value={value}
+              label={label}
+              description={description}
+              selfServe={profile?.engagement_mode === 'self_serve'}
+            />
+          ))}
         </div>
       )}
 

@@ -730,11 +730,19 @@ input[type='color']:focus-visible {
 
 /* Quick-start service cards */
 .quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 8px; }
+/* Renders as an <a> for managed accounts and a <button> for self-serve
+   (one navigates, the other creates), so the resets below keep both
+   looking identical. */
 .quick-start-card {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -743,6 +751,8 @@ input[type='color']:focus-visible {
   box-shadow: var(--shadow-xs);
   transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
+.quick-start-card:disabled { opacity: 0.6; cursor: progress; }
+.quick-start-error { font-size: 0.78rem; color: var(--danger); }
 .quick-start-card::before {
   content: '';
   position: absolute;

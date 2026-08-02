@@ -86,10 +86,16 @@ export default async function ClientProjectDetail({ params, searchParams }) {
           </div>
 
           <div className="card">
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-              {project?.description}
-            </p>
+            {/* A self-serve project has no brief — nobody is being
+                briefed — so an empty "Brief" heading is just noise. */}
+            {project?.description && (
+              <>
+                <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
+                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
+                  {project.description}
+                </p>
+              </>
+            )}
 
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
             <div className="file-list">
