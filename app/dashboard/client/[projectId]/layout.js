@@ -6,10 +6,11 @@ import PriorityBadge from '@/components/PriorityBadge';
 import DueDate from '@/components/DueDate';
 import ProjectTabs from '@/components/ProjectTabs';
 import { serviceLabel } from '@/lib/constants/services';
+import { hiddenProjectTabs } from '@/lib/engagement';
 
 export default async function ClientProjectLayout({ children, params }) {
   const { projectId } = await params;
-  const { supabase } = await getSessionProfile();
+  const { profile, supabase } = await getSessionProfile();
 
   const { data: project } = await supabase
     .from('projects')
@@ -20,6 +21,7 @@ export default async function ClientProjectLayout({ children, params }) {
   if (!project) notFound();
 
   const basePath = `/dashboard/client/${projectId}`;
+  const hide = await hiddenProjectTabs(supabase, { projectId, profile });
 
   return (
     <>
@@ -37,7 +39,7 @@ export default async function ClientProjectLayout({ children, params }) {
         </div>
       </div>
 
-      <ProjectTabs basePath={basePath} />
+      <ProjectTabs basePath={basePath} hide={hide} />
 
       {children}
     </>

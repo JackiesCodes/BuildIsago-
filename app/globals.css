@@ -673,6 +673,27 @@ input[type='color']:focus-visible {
 .profile-action-danger:hover { background: rgba(239, 106, 106, 0.12); color: var(--danger-strong); }
 .profile-action-danger:hover svg { color: var(--danger-strong); }
 
+/* Engagement mode picker (Settings) */
+.engagement-options { display: flex; flex-direction: column; gap: 10px; }
+.engagement-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.engagement-option:hover:not(:disabled) { border-color: var(--border-strong); }
+.engagement-option.active { border-color: var(--accent-ink); background: var(--accent-soft); }
+.engagement-option:disabled { opacity: 0.6; cursor: not-allowed; }
+.engagement-option-label { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+.engagement-option-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
 /* Mobile top bar + drawer — hidden until the sidebar is dropped */
 .mobile-bar { display: none; }
 .mobile-drawer-scrim { display: none; }

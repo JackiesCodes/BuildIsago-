@@ -13,12 +13,13 @@ const TABS = [
   { slug: 'retainers', label: 'Retainers' },
 ];
 
-export default function ProjectTabs({ basePath }) {
+export default function ProjectTabs({ basePath, hide = [] }) {
   const pathname = usePathname();
+  const tabs = hide.length ? TABS.filter((t) => !hide.includes(t.slug)) : TABS;
 
   return (
     <nav className="project-tabs" aria-label="Project sections">
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const href = tab.slug ? `${basePath}/${tab.slug}` : basePath;
         const active = tab.slug
           ? pathname.startsWith(href)

@@ -1,6 +1,7 @@
 import { getSessionProfile } from '@/lib/supabase/server';
 import AppearanceSettings from '@/components/AppearanceSettings';
 import MfaSettings from '@/components/MfaSettings';
+import EngagementSettings from '@/components/EngagementSettings';
 
 export default async function SettingsPage() {
   const { user, profile } = await getSessionProfile();
@@ -35,6 +36,16 @@ export default async function SettingsPage() {
           </div>
         )}
       </div>
+
+      {profile?.role !== 'studio' && (
+        <div className="card" style={{ marginBottom: 20, maxWidth: 560 }}>
+          <h3 style={{ marginBottom: 6, fontFamily: 'var(--font-display)' }}>How you work</h3>
+          <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem', marginBottom: 16 }}>
+            Controls whether approvals, invoices and retainers appear on your projects.
+          </p>
+          <EngagementSettings mode={profile?.engagement_mode} />
+        </div>
+      )}
 
       <div className="card" style={{ marginBottom: 20, maxWidth: 560 }}>
         <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Two-factor authentication</h3>
