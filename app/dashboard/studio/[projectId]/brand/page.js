@@ -2,18 +2,16 @@ import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import { getOrigin } from '@/lib/utils/origin';
 import BrandKitEditor from '@/components/BrandKitEditor';
-import CreateBrandKitButton from '@/components/CreateBrandKitButton';
+import { ensureBrandKit } from '@/lib/studioProvision';
+import { logError } from '@/lib/logging';
 
 export default async function StudioBrandStudioPage({ params }) {
   const { projectId } = await params;
-  const { profile, supabase } = await getSessionProfile();
+  const { user, profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
-  const { data: brandKit } = await supabase
-    .from('project_brand_kits')
-    .select('id, project_id, colors, heading_font, body_font, tagline, voice_tone, share_token, updated_at')
-    .eq('project_id', projectId)
-    .maybeSingle();
+  const { data: brandKit, error } = await ensureBrandKit(supabase, projectId, user.id);
+  if (error) await logError('brand.ensureBrandKit', error, { projectId });
 
   return (
     <>
@@ -30,8 +28,9 @@ export default async function StudioBrandStudioPage({ params }) {
           shareUrl={`${await getOrigin()}/brand/${brandKit.share_token}`}
         />
       ) : (
-        <div className="card" style={{ maxWidth: 480 }}>
-          <CreateBrandKitButton projectId={projectId} />
+        <div className="empty-state">
+          <h3>Couldn&apos;t open the Brand Studio</h3>
+          <p>We couldn&apos;t set up this brand kit — please try again shortly.</p>
         </div>
       )}
     </>

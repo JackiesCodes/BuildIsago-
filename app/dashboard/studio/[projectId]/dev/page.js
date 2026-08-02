@@ -2,20 +2,18 @@ import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import { fetchRepoData } from '@/lib/github';
 import DevScopeEditor from '@/components/DevScopeEditor';
-import CreateDevScopeButton from '@/components/CreateDevScopeButton';
+import { ensureDevScope } from '@/lib/studioProvision';
+import { logError } from '@/lib/logging';
 import RepoLinkForm from '@/components/RepoLinkForm';
 import RepoPanel from '@/components/RepoPanel';
 
 export default async function StudioDevStudioPage({ params }) {
   const { projectId } = await params;
-  const { profile, supabase } = await getSessionProfile();
+  const { user, profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
-  const { data: devScope } = await supabase
-    .from('project_dev_scopes')
-    .select('id, project_id, features, tech_stack, phases, risks, repo_owner, repo_name, updated_at')
-    .eq('project_id', projectId)
-    .maybeSingle();
+  const { data: devScope, error } = await ensureDevScope(supabase, projectId, user.id);
+  if (error) await logError('dev.ensureDevScope', error, { projectId });
 
   const repoData =
     devScope?.repo_owner && devScope?.repo_name
@@ -48,8 +46,9 @@ export default async function StudioDevStudioPage({ params }) {
           </div>
         </>
       ) : (
-        <div className="card" style={{ maxWidth: 480 }}>
-          <CreateDevScopeButton projectId={projectId} />
+        <div className="empty-state">
+          <h3>Couldn&apos;t open the Dev Studio</h3>
+          <p>We couldn&apos;t set up this dev scope — please try again shortly.</p>
         </div>
       )}
     </>

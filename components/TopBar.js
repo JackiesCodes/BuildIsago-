@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { IconSearch } from './icons';
-import ThemeToggle from './ThemeToggle';
 
-export default function TopBar({ homeHref, roleLabel }) {
+export default function TopBar({ homeHref }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,10 +37,6 @@ export default function TopBar({ homeHref, roleLabel }) {
         />
         <kbd title="Open command palette">⌘K</kbd>
       </label>
-      <div className="topbar-actions">
-        <ThemeToggle />
-        {roleLabel && <span className="role-pill">{roleLabel}</span>}
-      </div>
     </div>
   );
 }

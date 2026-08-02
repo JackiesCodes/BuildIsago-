@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { IconLogOut, IconPlus, IconSettings } from './icons';
+import { IconPlus, IconSettings } from './icons';
 import { NAV, SETTINGS_ITEM } from '@/lib/constants/nav';
+import ProfileMenu from './ProfileMenu';
 
 export default function Sidebar({ role, name, email, homeHref, signOutAction }) {
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
-  const initial = (name || email || '?').trim().charAt(0).toUpperCase();
 
   // Longest matching href wins — several nav items can share a path
   // prefix (e.g. /dashboard/studio and /dashboard/studio/products), so a
@@ -65,19 +65,11 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction }) 
         </ul>
       </nav>
 
+      {/* Sign-out and theme now live inside the profile menu, matching how
+          this is done nearly everywhere else — a permanently-visible
+          sign-out button is a destructive action sitting in the nav. */}
       <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <span className="sidebar-avatar">{initial}</span>
-          <div className="sidebar-user-info">
-            <span className="sidebar-user-name">{name}</span>
-            <span className="sidebar-user-role">{role === 'studio' ? 'Studio account' : 'Client account'}</span>
-          </div>
-        </div>
-        <form action={signOutAction}>
-          <button type="submit" className="sidebar-signout" title="Sign out" aria-label="Sign out">
-            <IconLogOut />
-          </button>
-        </form>
+        <ProfileMenu name={name} email={email} role={role} signOutAction={signOutAction} />
       </div>
     </aside>
   );

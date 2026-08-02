@@ -3,6 +3,7 @@ import { getSessionProfile } from '@/lib/supabase/server';
 import { signOut } from '@/lib/actions/auth';
 import Sidebar from '@/components/Sidebar';
 import TopBar from '@/components/TopBar';
+import MobileNav from '@/components/MobileNav';
 import CommandPalette from '@/components/CommandPalette';
 
 export default async function DashboardLayout({ children }) {
@@ -21,8 +22,15 @@ export default async function DashboardLayout({ children }) {
         homeHref={homeHref}
         signOutAction={signOut}
       />
+      <MobileNav
+        role={role}
+        name={profile?.full_name || user.email}
+        email={user.email}
+        homeHref={homeHref}
+        signOutAction={signOut}
+      />
       <div className="app-body">
-        <TopBar homeHref={homeHref} roleLabel={role === 'studio' ? 'Studio' : 'Client'} />
+        <TopBar homeHref={homeHref} />
         <main className="app-main">
           <div className="container">{children}</div>
         </main>
