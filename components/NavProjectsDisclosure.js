@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { IconChevronDown } from './icons';
 
 /**
- * The Projects/Pipeline nav item, with the list of projects collapsed
- * underneath it. Used by both the desktop sidebar and the mobile drawer,
- * which style it differently but behave identically.
+ * The Projects/Pipeline nav item, with the projects listed underneath.
+ * Shared by the desktop sidebar and the mobile drawer, which style it
+ * differently but behave identically.
  *
- * The row keeps two separate targets on purpose: the label still
- * navigates to the full list, and only the chevron expands. Making the
- * whole row a toggle would take away the "show me everything" click that
- * was there before.
+ * The whole row is the toggle — clicking "Projects" opens the list
+ * rather than navigating away from where you are. The full page is
+ * still reachable from "All projects" at the foot of the list, and from
+ * the brand logo.
  */
 export default function NavProjectsDisclosure({
   href,
@@ -32,22 +32,17 @@ export default function NavProjectsDisclosure({
 
   return (
     <li className="nav-disclosure">
-      <div className={`nav-disclosure-row${active ? ' active' : ''}`}>
-        <Link href={href} className={active ? 'active' : ''} onClick={onNavigate}>
-          <Icon />
-          <span>{label}</span>
-        </Link>
-        <button
-          type="button"
-          className={`nav-disclosure-toggle${open ? ' open' : ''}`}
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
-        >
-          <IconChevronDown />
-        </button>
-      </div>
+      <button
+        type="button"
+        className={`nav-disclosure-row${active ? ' active' : ''}${open ? ' open' : ''}`}
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={listId}
+      >
+        <Icon />
+        <span>{label}</span>
+        <IconChevronDown className="nav-disclosure-chevron" />
+      </button>
 
       {open && (
         <ul className="nav-project-list" id={listId}>
@@ -64,13 +59,18 @@ export default function NavProjectsDisclosure({
               </Link>
             </li>
           ))}
-          {hasMore && (
-            <li>
-              <Link href={href} className="nav-project-more" onClick={onNavigate}>
-                View all
-              </Link>
-            </li>
-          )}
+          {/* Always present, not just when the list is truncated: the row
+              above no longer navigates, so this is the way back to the
+              full page. */}
+          <li>
+            <Link
+              href={href}
+              className={`nav-project-more${pathname === href ? ' active' : ''}`}
+              onClick={onNavigate}
+            >
+              {hasMore ? 'View all projects' : 'All projects'}
+            </Link>
+          </li>
         </ul>
       )}
     </li>

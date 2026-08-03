@@ -7,7 +7,7 @@ import { NAV, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
 import ProfileMenu from './ProfileMenu';
 import NavProjectsDisclosure from './NavProjectsDisclosure';
 
-export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false }) {
+export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false, selfServe = false }) {
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
 
@@ -28,8 +28,10 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction, pr
         </span>
       </Link>
 
+      {/* Self-serve picks a discipline on the dashboard, which opens a
+          studio directly; only managed clients go via the brief form. */}
       {role === 'client' && (
-        <Link href="/dashboard/client/new" className="sidebar-cta">
+        <Link href={selfServe ? '/dashboard/client' : '/dashboard/client/new'} className="sidebar-cta">
           <IconPlus />
           <span>New Project</span>
         </Link>
