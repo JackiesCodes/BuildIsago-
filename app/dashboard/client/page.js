@@ -66,8 +66,11 @@ export default async function ClientDashboard({ searchParams }) {
     );
   }
 
+  // .home-view is what makes this the one page that fits the window:
+  // it centres in the space the shell leaves and lets the spacing
+  // compress on short screens rather than pushing the cards below the fold.
   return (
-    <>
+    <div className="home-view">
       <DashboardHero firstName={firstName} selfServe={selfServe} />
 
       <div className="quick-start-grid">
@@ -81,7 +84,6 @@ export default async function ClientDashboard({ searchParams }) {
           />
         ))}
       </div>
-
-    </>
+    </div>
   );
 }

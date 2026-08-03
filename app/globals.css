@@ -567,17 +567,40 @@ input[type='color']:focus-visible {
 .command-list button.active { background: var(--surface-2); }
 .command-list button.active svg { color: var(--accent-ink-strong); }
 
-/* Dashboard hero + composer */
-.hero { text-align: center; padding: 26px 0 40px; }
+/* Dashboard home — hero + composer + service cards on one screen.
+   This is the only page whose whole content is meant to be seen without
+   scrolling, so it opts out of the shell's generous page padding and
+   centres itself in whatever height is left. */
+/* :has() lets the page reach the scroll container it lives in — both to
+   trim the shell's page padding and to centre in the leftover height.
+   Where :has() is unsupported the base padding applies and the content
+   sits at the top: the old behaviour, not a broken one. */
+.app-main:has(.home-view) {
+  display: flex;
+  flex-direction: column;
+  padding-top: clamp(16px, 3vh, 40px);
+  padding-bottom: clamp(20px, 4vh, 48px);
+}
+/* The chain has to be unbroken for the centring to resolve: main grows,
+   container grows, and .home-view is what actually gets centred. */
+.app-main:has(.home-view) > .container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.hero { text-align: center; padding: 0 0 clamp(16px, 3.4vh, 36px); }
 /* Same asset and same rounded-tile treatment as the sidebar and mobile
    bar, only larger. No keying, glow or motion — the logo is placed here
    exactly as it is placed everywhere else. */
 .hero-mark {
   display: block;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 22px;
-  border-radius: 16px;
+  width: clamp(56px, 12vh, 80px);
+  height: clamp(56px, 12vh, 80px);
+  margin: 0 auto clamp(12px, 2.2vh, 18px);
+  border-radius: 20px;
   object-fit: contain;
 }
 
@@ -587,14 +610,17 @@ input[type='color']:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--muted-2);
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+  /* Height-aware as well as width-aware: on a short window the title is
+     the cheapest thing to shrink, and it shrinks before the composer or
+     the cards have to give anything up. */
+  font-size: clamp(1.5rem, min(3.6vw, 4.6vh), 2.4rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-  margin: 0 0 30px;
+  margin: 0 0 clamp(16px, 3vh, 28px);
 }
 
 .composer {
@@ -972,7 +998,7 @@ input[type='color']:focus-visible {
 .greeting p { color: var(--muted); margin: 0; font-size: 1.08rem; }
 
 /* Quick-start service cards */
-.quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 8px; }
+.quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(12px, 2vh, 20px); }
 /* Renders as an <a> for managed accounts and a <button> for self-serve
    (one navigates, the other creates), so the resets below keep both
    looking identical. */
@@ -990,7 +1016,7 @@ input[type='color']:focus-visible {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(6px, 1.2vh, 10px);
   width: 100%;
   text-align: left;
   font: inherit;
@@ -999,7 +1025,7 @@ input[type='color']:focus-visible {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: clamp(14px, 2.4vh, 20px);
   overflow: hidden;
   box-shadow: var(--shadow-xs);
   transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
@@ -2405,7 +2431,24 @@ input[type='color']:focus-visible {
     transition: background 0.15s ease, width 0.15s ease;
   }
   .kanban-swipe-dots button.active::before { background: var(--accent-ink-strong); width: 18px; border-radius: 999px; }
-  .quick-start-grid { grid-template-columns: 1fr; }
+  /* Two columns on the phone rather than a single stack of four, and each
+     card laid out as a row: icon, then label. A stack of four description
+     cards pushed the last two below the fold on every handset. The
+     description is what goes — on a 175px-wide card it wrapped to four
+     lines to restate a label that already says it. */
+  .quick-start-grid { grid-template-columns: 1fr 1fr; }
+  .quick-start-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .quick-start-desc,
+  .quick-start-corner,
+  .quick-start-go { display: none; }
+  .quick-start-icon { width: 32px; height: 32px; }
+  .quick-start-icon svg { width: 17px; height: 17px; }
+  .quick-start-title { font-size: 0.9rem; }
   /* The sidebar used to become a horizontally-scrolling strip of ~8
      icons at this width — too dense to aim at and impossible to label.
      Replaced by a compact bar plus a drawer, which is what Supabase and
@@ -2565,4 +2608,26 @@ input[type='color']:focus-visible {
   .invoice-line-total { grid-area: total; text-align: left; }
   .invoice-line-row button { grid-area: remove; justify-self: end; }
   .invoice-totals { max-width: none; }
+}
+
+/* Short windows — a laptop with the browser half-height, or a tablet in
+   landscape. Height is the constraint here, not width, so this is keyed
+   off height and comes last so it wins over the width breakpoints.
+   The card description is the first thing to go: it restates a label
+   that already reads clearly, and losing it is what keeps the four
+   services on screen. */
+@media (max-height: 700px) {
+  .quick-start-desc { display: none; }
+  .quick-start-card { gap: 8px; padding: 12px 14px; }
+}
+
+/* Very short windows. The eyebrow goes here because it greets you a
+   second time — the composer beneath it already says what the screen is
+   for — and it is the last thing worth the 27px it costs. */
+@media (max-height: 600px) {
+  .hero-eyebrow { display: none; }
+  .composer { padding: 10px 12px 10px; }
+  .composer-input { padding: 2px 2px 8px; }
+  .hero { padding-bottom: clamp(12px, 2.6vh, 36px); }
+  .app-main:has(.home-view) { padding-bottom: clamp(16px, 3vh, 48px); }
 }
