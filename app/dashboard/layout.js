@@ -17,12 +17,26 @@ export default async function DashboardLayout({ children }) {
 
   // Recent projects for the nav disclosure. Fetch one past the limit so
   // we know whether to offer "View all" without a second count query.
-  // RLS already scopes clients to their own rows; studio sees all.
-  const { data: navProjectRows } = await supabase
+  // RLS already scopes clients to their own rows.
+  let navProjectQuery = supabase
     .from('projects')
     .select('id, title')
     .order('created_at', { ascending: false })
     .limit(NAV_PROJECT_LIMIT + 1);
+
+  // Studio sees every project through RLS, but its nav should match its
+  // pipeline: work the studio was actually given, not the private
+  // workspaces of self-serve accounts.
+  if (role === 'studio') {
+    navProjectQuery = supabase
+      .from('projects')
+      .select('id, title, profiles!inner(engagement_mode)')
+      .eq('profiles.engagement_mode', 'managed')
+      .order('created_at', { ascending: false })
+      .limit(NAV_PROJECT_LIMIT + 1);
+  }
+
+  const { data: navProjectRows } = await navProjectQuery;
 
   const navProjects = (navProjectRows || []).slice(0, NAV_PROJECT_LIMIT);
   const hasMoreProjects = (navProjectRows || []).length > NAV_PROJECT_LIMIT;

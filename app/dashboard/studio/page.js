@@ -30,9 +30,17 @@ export default async function StudioDashboard({ searchParams }) {
   const { profile, supabase } = await getSessionProfile();
   if (profile?.role !== 'studio') redirect('/dashboard/client');
 
+  // The pipeline is the studio's work board, so it lists work the studio
+  // was actually given. A self-serve account's projects are that
+  // person's own workspace — nobody asked the studio for anything, and
+  // before this filter they queued up in Intake looking like unstarted
+  // jobs. Switching an account to "BuildIsago works with me" is what
+  // hands its projects over, and they appear here from that moment.
+  // !inner so the filter applies to the join rather than nulling it.
   let query = supabase
     .from('projects')
-    .select('id, title, service_type, status, created_at, due_date, priority, profiles(full_name, company)')
+    .select('id, title, service_type, status, created_at, due_date, priority, profiles!inner(full_name, company, engagement_mode)')
+    .eq('profiles.engagement_mode', 'managed')
     .order('created_at', { ascending: false });
 
   if (q) query = query.ilike('title', `%${q}%`);
@@ -51,14 +59,14 @@ export default async function StudioDashboard({ searchParams }) {
       <div className="page-head">
         <div>
           <h2>{q ? `Results for "${q}"` : 'Studio Pipeline'}</h2>
-          <p>Every client project, across all three disciplines, at a glance.</p>
+          <p>Every project clients have handed to the studio, at a glance.</p>
         </div>
       </div>
 
       {!all.length ? (
         <div className="empty-state">
           <h3>{q ? 'No matching projects' : 'No projects yet'}</h3>
-          <p>{q ? 'Try a different search term.' : "Client projects will show up here as soon as they're submitted."}</p>
+          <p>{q ? 'Try a different search term.' : "Projects appear here once a client asks the studio to work on them."}</p>
         </div>
       ) : (
         <>
