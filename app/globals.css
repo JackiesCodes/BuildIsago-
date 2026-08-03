@@ -567,6 +567,134 @@ input[type='color']:focus-visible {
 .command-list button.active { background: var(--surface-2); }
 .command-list button.active svg { color: var(--accent-ink-strong); }
 
+/* Dashboard hero + composer */
+.hero { text-align: center; padding: 26px 0 40px; }
+/* Drawn rather than an image asset, so it scales and re-tints with the
+   theme instead of shipping a bitmap that can only match one. */
+.hero-orb {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 26px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 70% 74%, var(--cyan-300), transparent 55%),
+    linear-gradient(150deg, var(--teal-400), var(--teal-600) 62%, #123 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.09) inset,
+    0 18px 44px -18px rgba(44, 198, 211, 0.55);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--muted-2);
+  margin: 0 0 12px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 30px;
+}
+
+.composer {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 14px 14px 12px;
+  box-shadow: var(--shadow-md);
+  transition: border-color 0.15s ease;
+}
+.composer:focus-within { border-color: var(--accent-ink); }
+.composer.is-busy { opacity: 0.7; }
+.composer-input { display: flex; gap: 10px; align-items: flex-start; padding: 4px 4px 10px; }
+.composer-input > svg { width: 17px; height: 17px; color: var(--accent-ink); flex-shrink: 0; margin-top: 3px; }
+.composer-input textarea {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  max-height: 200px;
+}
+.composer-input textarea::placeholder { color: var(--muted-2); }
+
+.composer-bar { display: flex; align-items: center; gap: 8px; }
+.composer-picker { position: relative; }
+.composer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.composer-pill:hover:not(:disabled) { border-color: var(--border-strong); color: var(--ink); }
+.composer-pill svg { width: 13px; height: 13px; }
+.composer-picker-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 288px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 60;
+}
+.composer-picker-menu button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+}
+.composer-picker-menu button:hover { background: var(--surface-2); }
+.composer-picker-menu button.active { background: var(--accent-soft); color: var(--accent-ink-strong); }
+.composer-picker-desc { font-size: 0.76rem; color: var(--muted-2); line-height: 1.4; }
+
+.composer-send {
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--teal-500);
+  color: #04141c;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.composer-send:hover:not(:disabled) { background: var(--teal-400); }
+.composer-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.composer-send svg { width: 17px; height: 17px; }
+.composer-error { max-width: 720px; margin: 12px auto 0; font-size: 0.82rem; color: var(--danger); }
+
 /* Project rename / delete */
 .project-actions { position: relative; }
 .project-actions-trigger {
@@ -851,6 +979,16 @@ input[type='color']:focus-visible {
 /* Renders as an <a> for managed accounts and a <button> for self-serve
    (one navigates, the other creates), so the resets below keep both
    looking identical. */
+.quick-start-head { display: flex; align-items: flex-start; justify-content: space-between; }
+.quick-start-corner {
+  width: 15px !important;
+  height: 15px !important;
+  color: var(--muted-2);
+  flex-shrink: 0;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+.quick-start-card:hover .quick-start-corner { color: var(--accent-ink); transform: translate(2px, -2px); }
+
 .quick-start-card {
   position: relative;
   display: flex;

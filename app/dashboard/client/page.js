@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusBadge from '@/components/StatusBadge';
 import QuickStartCard from '@/components/QuickStartCard';
+import DashboardHero from '@/components/DashboardHero';
 import { SERVICES, serviceLabel } from '@/lib/constants/services';
 import { isSelfServe } from '@/lib/engagement';
 
@@ -67,10 +68,7 @@ export default async function ClientDashboard({ searchParams }) {
 
   return (
     <>
-      <div className="greeting">
-        <h1>Hello, {firstName}</h1>
-        <p>What are we building today?</p>
-      </div>
+      <DashboardHero firstName={firstName} selfServe={selfServe} />
 
       <div className="quick-start-grid">
         {SERVICES.map(({ value, label, description }) => (
@@ -84,15 +82,6 @@ export default async function ClientDashboard({ searchParams }) {
         ))}
       </div>
 
-      {/* Managed clients brief the studio rather than opening a studio
-          themselves, so they still need a way in from here. */}
-      {!selfServe && (
-        <div style={{ marginTop: 32 }}>
-          <Link href="/dashboard/client/new" className="btn btn-primary" style={{ width: 'auto' }}>
-            New Project
-          </Link>
-        </div>
-      )}
     </>
   );
 }

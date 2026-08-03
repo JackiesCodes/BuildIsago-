@@ -52,14 +52,14 @@ export default function QuickStartCard({ value, label, description, selfServe })
 
   return (
     <button type="button" className="quick-start-card" disabled={pending} onClick={open}>
-      <span className="quick-start-icon">
-        <Icon />
+      <span className="quick-start-head">
+        <span className="quick-start-icon">
+          <Icon />
+        </span>
+        <IconArrowRight className="quick-start-corner" />
       </span>
       <span className="quick-start-title">{label}</span>
-      <span className="quick-start-desc">{description}</span>
-      <span className="quick-start-go">
-        {pending ? 'Opening…' : <>Open <IconArrowRight /></>}
-      </span>
+      <span className="quick-start-desc">{pending ? 'Opening…' : description}</span>
       {error && <span className="quick-start-error">{error}</span>}
     </button>
   );
