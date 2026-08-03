@@ -73,11 +73,7 @@ export default function DashboardHero({ firstName, selfServe }) {
 
   return (
     <section className="hero">
-      {/* Glow layers sit behind the mark and are purely decorative, so
-          they stay out of the accessibility tree. */}
       <div className="hero-mark">
-        <span className="hero-mark-glow" aria-hidden="true" />
-        <span className="hero-mark-ring" aria-hidden="true" />
         <img src="/logo-mark.png" alt="BuildIsago" className="hero-mark-logo" />
       </div>
       <p className="hero-eyebrow">Welcome back{firstName ? `, ${firstName}` : ''}</p>

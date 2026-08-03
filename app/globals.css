@@ -569,80 +569,30 @@ input[type='color']:focus-visible {
 
 /* Dashboard hero + composer */
 .hero { text-align: center; padding: 26px 0 40px; }
-/* The mark sits on layered glows rather than a flat disc: a wide soft
-   bloom, a tighter coloured core, and a thin specular ring. Together
-   they read as light coming off the logo instead of a circle drawn
-   behind it. All three are decorative and aria-hidden. */
+/* Just the mark — no bloom, ring or coloured drop-shadow behind it.
+   The float is kept: it is motion, not glow. */
 .hero-mark {
-  position: relative;
   width: 148px;
   height: 148px;
   margin: 0 auto 24px;
   display: grid;
   place-items: center;
-  isolation: isolate;
-}
-.hero-mark-glow,
-.hero-mark-ring {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-.hero-mark-glow {
-  inset: -18%;
-  background:
-    radial-gradient(circle at 50% 52%, rgba(111, 240, 234, 0.5), transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(18, 167, 187, 0.4), transparent 74%);
-  filter: blur(16px);
-  animation: hero-bloom 6s ease-in-out infinite;
-}
-.hero-mark-ring {
-  inset: 6%;
-  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.16), transparent 46%);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.18),
-    0 18px 38px -18px rgba(18, 167, 187, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  animation: hero-tilt 9s ease-in-out infinite;
 }
 .hero-mark-logo {
-  position: relative;
-  z-index: 1;
   width: 88%;
   height: 88%;
   object-fit: contain;
-  /* Coloured drop-shadow rather than a box shadow, so the light follows
-     the mark's silhouette instead of a square. */
-  filter: drop-shadow(0 4px 16px rgba(44, 198, 211, 0.6)) saturate(1.12) brightness(1.06);
   animation: hero-float 7s ease-in-out infinite;
-}
-
-:root[data-theme='light'] .hero-mark-ring {
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.7),
-    inset 0 -10px 22px -14px rgba(20, 40, 55, 0.25),
-    0 16px 34px -20px rgba(13, 126, 143, 0.55);
-  border-color: rgba(20, 40, 55, 0.06);
 }
 
 @keyframes hero-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50%      { transform: translateY(-5px) rotate(-1.6deg); }
 }
-@keyframes hero-bloom {
-  0%, 100% { opacity: 0.75; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.06); }
-}
-@keyframes hero-tilt {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  50%      { transform: rotate(3deg) scale(1.015); }
-}
 
 /* Motion here is atmosphere, not information, so it is dropped entirely
    rather than merely shortened when reduced motion is requested. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-mark-glow,
-  .hero-mark-ring,
   .hero-mark-logo { animation: none; }
 }
 
