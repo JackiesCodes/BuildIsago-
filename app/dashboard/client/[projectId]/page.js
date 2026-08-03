@@ -4,11 +4,12 @@ import FileUploader from '@/components/FileUploader';
 import MilestoneChecklist from '@/components/MilestoneChecklist';
 import AiDraftPanel from '@/components/AiDraftPanel';
 import DesignsList from '@/components/DesignsList';
+import { isSelfServe, showManagedSection } from '@/lib/engagement';
 
 export default async function ClientProjectDetail({ params, searchParams }) {
   const { projectId } = await params;
   const { setup } = await searchParams;
-  const { user, supabase } = await getSessionProfile();
+  const { user, profile, supabase } = await getSessionProfile();
 
   const { data: project } = await supabase
     .from('projects')
@@ -54,6 +55,17 @@ export default async function ClientProjectDetail({ params, searchParams }) {
     .eq('project_id', projectId)
     .order('updated_at', { ascending: false });
 
+  // Talking to the studio, the studio's milestones and the brief they
+  // work from only mean something when the studio is working this
+  // project. Each still appears the moment it has real content, so
+  // nothing the studio has already sent can go missing.
+  const selfServe = isSelfServe(profile);
+  const showConversation = showManagedSection(selfServe, messages.length);
+  const showProgress = showManagedSection(selfServe, milestones?.length);
+  const showAiDraft = showManagedSection(selfServe, project?.ai_draft);
+  const showBrief = Boolean(project?.description);
+  const showFiles = showManagedSection(selfServe, filesWithUrls.length);
+
   return (
     <>
       {setup === 'partial' && (
@@ -63,54 +75,66 @@ export default async function ClientProjectDetail({ params, searchParams }) {
         </div>
       )}
 
-      <div className="detail-grid">
-        <div className="card">
-          <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Conversation</h3>
-          <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
-        </div>
+      {/* Without the conversation column this is a single column of
+          tools, so the two-column split would leave a large empty gap. */}
+      <div className={showConversation ? 'detail-grid' : ''}>
+        {showConversation && (
+          <div className="card">
+            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Conversation</h3>
+            <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
+          </div>
+        )}
 
         <div>
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
-            <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable={false} />
-          </div>
+          {showProgress && (
+            <div className="card" style={{ marginBottom: 20 }}>
+              <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
+              <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable={false} />
+            </div>
+          )}
 
-          <div className="card" style={{ marginBottom: 20 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
-            <AiDraftPanel projectId={projectId} draft={project?.ai_draft} generatedAt={project?.ai_draft_generated_at} />
-          </div>
+          {showAiDraft && (
+            <div className="card" style={{ marginBottom: 20 }}>
+              <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
+              <AiDraftPanel projectId={projectId} draft={project?.ai_draft} generatedAt={project?.ai_draft_generated_at} />
+            </div>
+          )}
 
-          <div className="card" style={{ marginBottom: 20 }}>
+          <div className="card" style={{ marginBottom: showBrief || showFiles ? 20 : 0 }}>
             <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
             <DesignsList projectId={projectId} designs={designs || []} />
           </div>
 
-          <div className="card">
-            {/* A self-serve project has no brief — nobody is being
-                briefed — so an empty "Brief" heading is just noise. */}
-            {project?.description && (
-              <>
-                <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
-                <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-                  {project.description}
-                </p>
-              </>
-            )}
-
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
-            <div className="file-list">
-              {!filesWithUrls.length && (
-                <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
+          {(showBrief || showFiles) && (
+            <div className="card">
+              {showBrief && (
+                <>
+                  <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
+                  <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
+                    {project.description}
+                  </p>
+                </>
               )}
-              {filesWithUrls.map((f) => (
-                <div key={f.id} className="file-row">
-                  <span>{f.file_name}</span>
-                  {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
-                </div>
-              ))}
+
+              {showFiles && (
+                <>
+                  <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
+                  <div className="file-list">
+                    {!filesWithUrls.length && (
+                      <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
+                    )}
+                    {filesWithUrls.map((f) => (
+                      <div key={f.id} className="file-row">
+                        <span>{f.file_name}</span>
+                        {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
+                      </div>
+                    ))}
+                  </div>
+                  <FileUploader projectId={projectId} />
+                </>
+              )}
             </div>
-            <FileUploader projectId={projectId} />
-          </div>
+          )}
         </div>
       </div>
     </>
