@@ -567,6 +567,69 @@ input[type='color']:focus-visible {
 .command-list button.active { background: var(--surface-2); }
 .command-list button.active svg { color: var(--accent-ink-strong); }
 
+/* Project rename / delete */
+.project-actions { position: relative; }
+.project-actions-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.project-actions-trigger:hover:not(:disabled) { background: var(--surface-2); }
+.project-actions-trigger:disabled { opacity: 0.5; cursor: not-allowed; }
+.project-actions-trigger svg { width: 13px; height: 13px; color: var(--muted-2); }
+.project-actions-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 190px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 60;
+}
+.project-actions-menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.project-actions-menu button svg { width: 15px; height: 15px; color: var(--muted-2); }
+.project-actions-menu button:hover { background: var(--surface-2); }
+.project-actions-menu .is-danger:hover { background: rgba(239, 106, 106, 0.12); color: var(--danger-strong); }
+.project-actions-menu .is-danger:hover svg { color: var(--danger-strong); }
+.project-actions-error { display: block; margin-top: 6px; font-size: 0.78rem; color: var(--danger); }
+
+.project-rename { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.project-rename input {
+  border: 1px solid var(--accent-ink);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  font-size: 0.9rem;
+  min-width: 220px;
+}
+.project-rename input:focus { outline: none; box-shadow: 0 0 0 3px rgba(44, 198, 211, 0.15); }
+
 /* Projects disclosure — shared by the sidebar and the mobile drawer, so
    sizing comes from whichever nav it sits in rather than being fixed. */
 /* The whole row toggles the list — it is a button, not a link, so it

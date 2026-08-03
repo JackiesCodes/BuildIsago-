@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import StatusSelect from '@/components/StatusSelect';
 import ProjectTabs from '@/components/ProjectTabs';
+import ProjectActions from '@/components/ProjectActions';
 import { serviceLabel } from '@/lib/constants/services';
 
 export default async function StudioProjectLayout({ children, params }) {
@@ -34,7 +35,10 @@ export default async function StudioProjectLayout({ children, params }) {
             <span className="service-tag">{serviceLabel(project.service_type)}</span>
           </p>
         </div>
-        <StatusSelect projectId={project.id} status={project.status} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <StatusSelect projectId={project.id} status={project.status} />
+          <ProjectActions projectId={project.id} title={project.title} />
+        </div>
       </div>
 
       <ProjectTabs basePath={basePath} />

@@ -5,6 +5,7 @@ import StatusBadge from '@/components/StatusBadge';
 import PriorityBadge from '@/components/PriorityBadge';
 import DueDate from '@/components/DueDate';
 import ProjectTabs from '@/components/ProjectTabs';
+import ProjectActions from '@/components/ProjectActions';
 import { serviceLabel } from '@/lib/constants/services';
 import { hiddenProjectTabs } from '@/lib/engagement';
 
@@ -32,10 +33,11 @@ export default async function ClientProjectLayout({ children, params }) {
           <h1>{project.title}</h1>
           <p className="service-tag">{serviceLabel(project.service_type)}</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <DueDate date={project.due_date} />
           <PriorityBadge priority={project.priority} />
           <StatusBadge status={project.status} />
+          <ProjectActions projectId={project.id} title={project.title} />
         </div>
       </div>
 
