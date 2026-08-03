@@ -569,31 +569,16 @@ input[type='color']:focus-visible {
 
 /* Dashboard hero + composer */
 .hero { text-align: center; padding: 26px 0 40px; }
-/* Just the mark — no bloom, ring or coloured drop-shadow behind it.
-   The float is kept: it is motion, not glow. */
+/* Same asset and same rounded-tile treatment as the sidebar and mobile
+   bar, only larger. No keying, glow or motion — the logo is placed here
+   exactly as it is placed everywhere else. */
 .hero-mark {
-  width: 148px;
-  height: 148px;
-  margin: 0 auto 24px;
-  display: grid;
-  place-items: center;
-}
-.hero-mark-logo {
-  width: 88%;
-  height: 88%;
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 22px;
+  border-radius: 16px;
   object-fit: contain;
-  animation: hero-float 7s ease-in-out infinite;
-}
-
-@keyframes hero-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-5px) rotate(-1.6deg); }
-}
-
-/* Motion here is atmosphere, not information, so it is dropped entirely
-   rather than merely shortened when reduced motion is requested. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-mark-logo { animation: none; }
 }
 
 .hero-eyebrow {

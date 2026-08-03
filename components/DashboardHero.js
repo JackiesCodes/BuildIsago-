@@ -73,9 +73,7 @@ export default function DashboardHero({ firstName, selfServe }) {
 
   return (
     <section className="hero">
-      <div className="hero-mark">
-        <img src="/logo-mark.png" alt="BuildIsago" className="hero-mark-logo" />
-      </div>
+      <img src="/logo-icon.png" alt="BuildIsago" className="hero-mark" />
       <p className="hero-eyebrow">Welcome back{firstName ? `, ${firstName}` : ''}</p>
       <h1 className="hero-title">Bring your ideas to life today</h1>
 
