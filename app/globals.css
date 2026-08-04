@@ -1144,7 +1144,12 @@ input[type='color']:focus-visible {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  align-items: start;
+  /* Columns share a height. With align-items:start each one shrank to
+     its own contents, so a board with 1/3/1/0 cards came out as four
+     boxes of four different heights and stopped reading as a board.
+     Equal columns also give the empty ones somewhere to put "Nothing
+     here" other than a sliver. */
+  align-items: stretch;
 }
 .kanban-column {
   background: var(--surface);
@@ -2389,7 +2394,14 @@ input[type='color']:focus-visible {
   .card { padding: 22px; }
   .greeting { margin-bottom: 30px; }
   .page-head { margin-bottom: 30px; }
-  .stats-row { grid-template-columns: 1fr; }
+  /* Three tiles stacked filled a phone screen on their own and pushed
+     the kanban board clean off the bottom — you had to scroll past the
+     summary to reach the work. Side by side they are a strip, which is
+     all a number and a label need. */
+  .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px; }
+  .stat-tile { padding: 12px 10px; gap: 2px; }
+  .stat-tile-num { font-size: 1.35rem; }
+  .stat-tile-label { font-size: 0.68rem; line-height: 1.3; }
   /* A vertical stack would force scrolling through every "done" card in
      column 1 before reaching column 2; swipeable, snapped columns (like
      Trello/Linear mobile) keep each column reachable in one gesture. The

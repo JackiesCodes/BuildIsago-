@@ -52,15 +52,17 @@ export default async function StudioDashboard({ searchParams }) {
 
   return (
     <>
-      <div className="greeting">
-        <h1>Hello, {firstName}</h1>
-        <p>Here&apos;s what&apos;s moving across the studio.</p>
-      </div>
-
+      {/* One heading, not two. This was a "Hello, Albin" block stacked on
+          top of a "Studio Pipeline" block — an h1 and an h2 introducing
+          the same page, costing ~130px before any work was visible. The
+          greeting survives as the supporting line, where it still reads
+          as a greeting without pretending to be a second page title. */}
       <div className="page-head page-head-search">
         <div>
-          <h2>{q ? `Results for "${q}"` : 'Studio Pipeline'}</h2>
-          <p>Every project clients have handed to the studio, at a glance.</p>
+          <h1>{q ? `Results for “${q}”` : 'Studio Pipeline'}</h1>
+          <p>
+            Hello, {firstName} — every project clients have handed to the studio, at a glance.
+          </p>
         </div>
         {/* The pipeline is the studio's projects section, so its search
             sits here for the same reason the client's sits on theirs. */}

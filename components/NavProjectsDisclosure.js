@@ -27,13 +27,21 @@ export default function NavProjectsDisclosure({
 }) {
   const listId = useId();
   // The list page and an individual project are different routes for the
-  // client (…/projects vs …/<id>), so "am I inside a project" is asked of
-  // the project base, not of the section.
+  // client (…/projects vs …/<id>), so project links are built from the
+  // project base, not from the section href.
   const base = projectBase || href;
-  const onAProject = pathname.startsWith(`${base}/`) && pathname !== href;
-  // Open by default when you're already inside a project, so the list
+
+  // Open by default when this nav item is the active one, so the list
   // shows where you are rather than hiding it behind a click.
-  const [open, setOpen] = useState(onAProject);
+  //
+  // `active` rather than a path test of our own: on the studio side the
+  // pipeline and its sibling sections share a prefix (/dashboard/studio
+  // vs /dashboard/studio/products), so "does the path start with mine"
+  // was true on Products, Academy, Talent, Ventures and Activity — and
+  // false on the pipeline itself. The list expanded on every page except
+  // the one it belongs to. activeNavHref() already resolves that with a
+  // longest-match rule, and it is tested.
+  const [open, setOpen] = useState(Boolean(active));
 
   return (
     <li className="nav-disclosure">
