@@ -8,7 +8,14 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://build-isago.vercel
 export default async function sitemap() {
   const supabase = await createClient();
 
-  const staticRoutes = ['', '/store', '/academy', '/marketplace', '/ventures', '/login', '/signup'].map((path) => ({
+  // Only routes robots.txt actually allows, and only ones that return a
+  // page. /login and /signup were listed here while robots.js disallows
+  // them — submitting a blocked URL is a Search Console error, not a
+  // ranking. '' was listed too, and the app root is a redirect to /login
+  // or /dashboard, so it was a sitemap entry that never resolves to
+  // content. The marketing site is the real homepage and is deployed
+  // separately with its own sitemap.
+  const staticRoutes = ['/store', '/academy', '/marketplace', '/ventures'].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified: new Date(),
   }));

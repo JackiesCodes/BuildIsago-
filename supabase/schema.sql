@@ -8,7 +8,12 @@ create extension if not exists pgcrypto;
 -- ============================================
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  role text not null default 'client' check (role in ('client', 'studio')),
+  -- 'talent' is legacy: join_marketplace_as_talent() used to write it here
+  -- and no longer does (migration 020), but existing databases still hold
+  -- rows with it, so the constraint keeps accepting it. Nothing reads it —
+  -- talent membership is the public.talent row, and the app's only role
+  -- test is for 'studio'.
+  role text not null default 'client' check (role in ('client', 'studio', 'talent')),
   full_name text,
   company text,
   created_at timestamptz not null default now()
@@ -1191,8 +1196,10 @@ begin
     raise exception 'studio accounts cannot join as talent';
   end if;
 
-  perform set_config('app.allow_role_change', 'true', true);
-  update public.profiles set role = 'talent' where id = auth.uid();
+  -- Talent identity lives in public.talent, keyed by profile_id. That row
+  -- is the membership; profiles.role is deliberately left alone. Writing
+  -- role = 'talent' here used to overwrite whatever the account already
+  -- was, which cost real accounts their studio access. See migration 020.
 
   select id into v_talent_id from public.talent where profile_id = auth.uid();
   if v_talent_id is null then
@@ -2004,8 +2011,10 @@ begin
     raise exception 'studio accounts cannot join as talent';
   end if;
 
-  perform set_config('app.allow_role_change', 'true', true);
-  update public.profiles set role = 'talent' where id = auth.uid();
+  -- Talent identity lives in public.talent, keyed by profile_id. That row
+  -- is the membership; profiles.role is deliberately left alone. Writing
+  -- role = 'talent' here used to overwrite whatever the account already
+  -- was, which cost real accounts their studio access. See migration 020.
 
   select id into v_talent_id from public.talent where profile_id = auth.uid();
   if v_talent_id is null then
@@ -2206,3 +2215,56 @@ end;
 $$;
 
 grant execute on function public.delete_project(uuid) to authenticated;
+
+-- ============================================
+-- RPC exposure (migration 021)
+-- ============================================
+-- PostgreSQL grants EXECUTE on every new function to PUBLIC, and Supabase's
+-- anon role inherits it there — so without this block every function below
+-- answers unauthenticated requests at /rest/v1/rpc/<name>. Revoking from
+-- `anon` alone does nothing; PUBLIC is what has to go.
+--
+-- Deliberately left open to anon: check_rate_limit (login, signup and
+-- password reset call it before anyone is signed in) and the
+-- list_published_*/get_public_* family (the storefront and marketing pages
+-- have no session by design).
+revoke execute on function public.log_audit_event(text, text, text, jsonb) from public, anon, authenticated;
+grant execute on function public.log_audit_event(text, text, text, jsonb) to authenticated, service_role;
+revoke execute on function public.next_invoice_number() from public, anon, authenticated;
+grant execute on function public.next_invoice_number() to authenticated, service_role;
+revoke execute on function public.is_studio() from public, anon, authenticated;
+grant execute on function public.is_studio() to authenticated, service_role;
+revoke execute on function public.is_studio_owner() from public, anon, authenticated;
+grant execute on function public.is_studio_owner() to authenticated, service_role;
+revoke execute on function public.join_marketplace_as_talent() from public, anon, authenticated;
+grant execute on function public.join_marketplace_as_talent() to authenticated, service_role;
+revoke execute on function public.promote_venture_application(uuid) from public, anon, authenticated;
+grant execute on function public.promote_venture_application(uuid) to authenticated, service_role;
+revoke execute on function public.claim_free_course(uuid) from public, anon, authenticated;
+grant execute on function public.claim_free_course(uuid) to authenticated, service_role;
+revoke execute on function public.claim_free_product(uuid) from public, anon, authenticated;
+grant execute on function public.claim_free_product(uuid) to authenticated, service_role;
+revoke execute on function public.decide_approval(uuid, text, text) from public, anon, authenticated;
+grant execute on function public.decide_approval(uuid, text, text) to authenticated, service_role;
+revoke execute on function public.delete_project(uuid) from public, anon, authenticated;
+grant execute on function public.delete_project(uuid) to authenticated, service_role;
+revoke execute on function public.rename_project(uuid, text) from public, anon, authenticated;
+grant execute on function public.rename_project(uuid, text) to authenticated, service_role;
+revoke execute on function public.request_cancel_retainer(uuid) from public, anon, authenticated;
+grant execute on function public.request_cancel_retainer(uuid) to authenticated, service_role;
+revoke execute on function public.set_lesson_complete(uuid, boolean) from public, anon, authenticated;
+grant execute on function public.set_lesson_complete(uuid, boolean) to authenticated, service_role;
+revoke execute on function public.set_project_ai_draft(uuid, text) from public, anon, authenticated;
+grant execute on function public.set_project_ai_draft(uuid, text) to authenticated, service_role;
+revoke execute on function public.get_course_lessons_for_student(uuid) from public, anon, authenticated;
+grant execute on function public.get_course_lessons_for_student(uuid) to authenticated, service_role;
+revoke execute on function public.get_my_enrollments() from public, anon, authenticated;
+grant execute on function public.get_my_enrollments() to authenticated, service_role;
+revoke execute on function public.get_my_purchases() from public, anon, authenticated;
+grant execute on function public.get_my_purchases() to authenticated, service_role;
+
+-- The auth trigger, not an API. Removing EXECUTE does not stop the trigger:
+-- PostgreSQL checks EXECUTE on a trigger function when the trigger is
+-- created, not when it fires.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to service_role;

@@ -34,7 +34,7 @@ export default async function ProjectsPage({ searchParams }) {
     <>
       <div className="page-head page-head-search">
         <div>
-          <h2>Projects</h2>
+          <h1>Projects</h1>
           <p>
             {searching
               ? `${projects?.length || 0} matching “${q}”`
