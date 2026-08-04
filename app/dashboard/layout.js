@@ -4,7 +4,6 @@ import { NAV_PROJECT_LIMIT } from '@/lib/constants/nav';
 import { isSelfServe } from '@/lib/engagement';
 import { signOut } from '@/lib/actions/auth';
 import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
 import MobileNav from '@/components/MobileNav';
 import CommandPalette from '@/components/CommandPalette';
 
@@ -65,7 +64,10 @@ export default async function DashboardLayout({ children }) {
         selfServe={selfServe}
       />
       <div className="app-body">
-        <TopBar homeHref={homeHref} />
+        {/* No top bar: search was the only thing in it, and it now lives
+            on the Projects page it filters. An empty 73px strip across
+            every screen would be worse than none. ⌘K still opens the
+            command palette from anywhere. */}
         <main className="app-main">
           <div className="container">{children}</div>
         </main>

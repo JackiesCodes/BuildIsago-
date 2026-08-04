@@ -5,6 +5,7 @@ import StatusSelect from '@/components/StatusSelect';
 import PriorityBadge from '@/components/PriorityBadge';
 import DueDate from '@/components/DueDate';
 import KanbanSwipeDots from '@/components/KanbanSwipeDots';
+import ProjectSearch from '@/components/ProjectSearch';
 import { SERVICES, serviceLabel } from '@/lib/constants/services';
 
 const COLUMNS = [
@@ -56,11 +57,14 @@ export default async function StudioDashboard({ searchParams }) {
         <p>Here&apos;s what&apos;s moving across the studio.</p>
       </div>
 
-      <div className="page-head">
+      <div className="page-head page-head-search">
         <div>
           <h2>{q ? `Results for "${q}"` : 'Studio Pipeline'}</h2>
           <p>Every project clients have handed to the studio, at a glance.</p>
         </div>
+        {/* The pipeline is the studio's projects section, so its search
+            sits here for the same reason the client's sits on theirs. */}
+        <ProjectSearch placeholder="Search the pipeline…" />
       </div>
 
       {!all.length ? (

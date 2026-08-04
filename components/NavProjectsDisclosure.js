@@ -16,6 +16,7 @@ import { IconChevronDown } from './icons';
  */
 export default function NavProjectsDisclosure({
   href,
+  projectBase,
   label,
   icon: Icon,
   projects = [],
@@ -25,7 +26,11 @@ export default function NavProjectsDisclosure({
   onNavigate,
 }) {
   const listId = useId();
-  const onAProject = pathname.startsWith(`${href}/`);
+  // The list page and an individual project are different routes for the
+  // client (…/projects vs …/<id>), so "am I inside a project" is asked of
+  // the project base, not of the section.
+  const base = projectBase || href;
+  const onAProject = pathname.startsWith(`${base}/`) && pathname !== href;
   // Open by default when you're already inside a project, so the list
   // shows where you are rather than hiding it behind a click.
   const [open, setOpen] = useState(onAProject);
@@ -50,8 +55,8 @@ export default function NavProjectsDisclosure({
           {projects.map((project) => (
             <li key={project.id}>
               <Link
-                href={`${href}/${project.id}`}
-                className={pathname.startsWith(`${href}/${project.id}`) ? 'active' : ''}
+                href={`${base}/${project.id}`}
+                className={pathname.startsWith(`${base}/${project.id}`) ? 'active' : ''}
                 onClick={onNavigate}
                 title={project.title}
               >

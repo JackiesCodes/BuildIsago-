@@ -3,21 +3,21 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { IconPlus, IconSettings } from './icons';
-import { NAV, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
+import { NAV, PROJECT_BASE, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
 import ProfileMenu from './ProfileMenu';
 import NavProjectsDisclosure from './NavProjectsDisclosure';
+import { activeNavHref } from '@/lib/nav';
 
 export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false, selfServe = false }) {
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
 
-  // Longest matching href wins — several nav items can share a path
-  // prefix (e.g. /dashboard/studio and /dashboard/studio/products), so a
-  // plain startsWith() would light up more than one at a time.
-  const activeHref = navItems
-    .map((item) => item.href)
-    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
-    .sort((a, b) => b.length - a.length)[0];
+  const activeHref = activeNavHref({
+    hrefs: navItems.map((item) => item.href),
+    pathname,
+    projectBase: PROJECT_BASE[role],
+    projectsHref: PROJECTS_HREF[role],
+  });
 
   return (
     <aside className="sidebar">
@@ -48,6 +48,7 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction, pr
                 <NavProjectsDisclosure
                   key={item.href}
                   href={item.href}
+                  projectBase={PROJECT_BASE[role]}
                   label={item.label}
                   icon={Icon}
                   projects={projects}

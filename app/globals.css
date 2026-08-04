@@ -325,7 +325,7 @@ input[type='color']:focus-visible {
 
 /* App shell (dashboard) — fixed to the viewport, like Claude.ai/ChatGPT or a
    design tool's workspace chrome. Nothing at this level scrolls; .app-main is
-   the one scrollable region so the sidebar and topbar stay put regardless of
+   the one scrollable region so the sidebar stays put regardless of
    how long a page's content gets. `min-height: 0` on the flex children is
    required — without it a flex item won't shrink below its content size, and
    the overflow would silently push out to the shell instead of scrolling. */
@@ -458,20 +458,9 @@ input[type='color']:focus-visible {
 .sidebar-signout:hover { border-color: var(--accent-ink); color: var(--accent-ink); }
 .sidebar-signout svg { width: 16px; height: 16px; }
 
-/* Top bar — a flex item above the scrollable .app-main, in a column that
-   itself never scrolls, so it stays put without needing to be sticky. */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 28px;
-  border-bottom: 1px solid var(--border);
-  background: transparent;
-  flex-shrink: 0;
-  z-index: 10;
-}
-.topbar-search {
+/* Search, on the page it filters. Sits in the page head beside the
+   heading rather than in app chrome. */
+.project-search {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -479,20 +468,29 @@ input[type='color']:focus-visible {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 9px 14px;
+  width: 100%;
+  max-width: 320px;
+  flex-shrink: 0;
+}
+.project-search:focus-within { border-color: var(--accent-ink); }
+.project-search svg { width: 16px; height: 16px; color: var(--muted-2); flex-shrink: 0; }
+.project-search input {
+  background: transparent;
+  border: none;
+  outline: none;
   flex: 1;
-  max-width: 420px;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--ink);
 }
-.topbar-search svg { width: 16px; height: 16px; color: var(--muted-2); flex-shrink: 0; }
-.topbar-search input { background: transparent; border: none; outline: none; flex: 1; font-size: 0.9rem; color: var(--ink); }
-.topbar-search input::placeholder { color: var(--muted-2); }
-.topbar-search kbd {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--muted-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 5px;
-  padding: 2px 6px;
-}
+.project-search input::placeholder { color: var(--muted-2); }
+/* Safari draws its own clear button on type="search" and it does not
+   match anything else here. */
+.project-search input::-webkit-search-decoration,
+.project-search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+.page-head-search { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 
 /* Command palette */
 .command-overlay {
@@ -967,7 +965,6 @@ input[type='color']:focus-visible {
 .mobile-bar { display: none; }
 .mobile-drawer-scrim { display: none; }
 
-.topbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 .theme-toggle {
   width: 36px;
   height: 36px;
@@ -2383,8 +2380,6 @@ input[type='color']:focus-visible {
   .sidebar .nav-disclosure-chevron,
   .sidebar .nav-project-list { display: none; }
   .sidebar-user { justify-content: center; }
-  .topbar { padding: 14px 20px; }
-  .topbar-search kbd { display: none; }
   .quick-start-grid { grid-template-columns: 1fr 1fr; }
 }
 
@@ -2553,8 +2548,8 @@ input[type='color']:focus-visible {
     margin-bottom: 8px;
   }
   .mobile-drawer-foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); }
-  .topbar { padding: 12px 16px; flex-wrap: wrap; }
-  .topbar-search { max-width: none; }
+  .project-search { max-width: none; }
+  .page-head-search { align-items: stretch; }
 
   /* Design Studio: stop the fixed-width properties panel from crushing
      the canvas, and let the canvas scale down to fit the viewport
@@ -2613,11 +2608,10 @@ input[type='color']:focus-visible {
 /* Short windows — a laptop with the browser half-height, or a tablet in
    landscape. Height is the constraint here, not width, so this is keyed
    off height and comes last so it wins over the width breakpoints.
-   The card description is the first thing to go: it restates a label
-   that already reads clearly, and losing it is what keeps the four
-   services on screen. */
+   Tightening the cards is enough on its own: with the top bar gone, the
+   descriptions still fit down to 540px of viewport height, so desktop
+   keeps them and only the phone layout drops them. */
 @media (max-height: 700px) {
-  .quick-start-desc { display: none; }
   .quick-start-card { gap: 8px; padding: 12px 14px; }
 }
 

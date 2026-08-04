@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NAV, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
+import { NAV, PROJECT_BASE, PROJECTS_HREF, SETTINGS_ITEM } from '@/lib/constants/nav';
 import NavProjectsDisclosure from './NavProjectsDisclosure';
+import { activeNavHref } from '@/lib/nav';
 import { IconLogOut, IconPlus, IconSettings } from './icons';
 import { applyPreference, getPreference, THEME_EVENT } from '@/lib/theme';
 
@@ -22,10 +23,12 @@ export default function MobileNav({ role, name, email, homeHref, signOutAction, 
   const navItems = NAV[role] || NAV.client;
   const initial = (name || email || '?').trim().charAt(0).toUpperCase();
 
-  const activeHref = navItems
-    .map((item) => item.href)
-    .filter((href) => pathname === href || pathname.startsWith(`${href}/`))
-    .sort((a, b) => b.length - a.length)[0];
+  const activeHref = activeNavHref({
+    hrefs: navItems.map((item) => item.href),
+    pathname,
+    projectBase: PROJECT_BASE[role],
+    projectsHref: PROJECTS_HREF[role],
+  });
 
   useEffect(() => {
     setPref(getPreference());
@@ -119,6 +122,7 @@ export default function MobileNav({ role, name, email, homeHref, signOutAction, 
                     <NavProjectsDisclosure
                       key={item.href}
                       href={item.href}
+                      projectBase={PROJECT_BASE[role]}
                       label={item.label}
                       icon={Icon}
                       projects={projects}
