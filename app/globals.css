@@ -2637,3 +2637,106 @@ input[type='color']:focus-visible {
   .hero { padding-bottom: clamp(12px, 2.6vh, 36px); }
   .app-main:has(.home-view) { padding-bottom: clamp(16px, 3vh, 48px); }
 }
+
+/* ============================================
+   Status pages (404, error) and loading skeletons
+   ============================================ */
+
+/* Used by app/not-found.js and app/error.js. These render outside the
+   dashboard shell — a 404 can be hit logged-out on /store — so the page
+   centres itself in the viewport rather than assuming a layout. */
+.status-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+  background: var(--bg);
+}
+.status-page-inner { max-width: 460px; text-align: center; }
+.status-page-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: contain;
+  margin: 0 auto 20px;
+  display: block;
+}
+.status-page-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin: 0 0 10px;
+}
+.status-page h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.status-page-body { color: var(--muted-2); margin: 0 0 26px; }
+.status-page-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+/* The shared .btn is a full-width block in forms; these sit side by side. */
+.status-page-actions .btn { width: auto; }
+.status-page-digest { margin: 24px 0 0; font-size: 0.78rem; color: var(--muted-2); }
+.status-page-digest code {
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Visible to screen readers only — the loading skeleton's actual label. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skeleton-page { display: flex; flex-direction: column; gap: 14px; }
+.skeleton {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-title { height: 30px; width: min(280px, 60%); border-radius: var(--radius-sm); }
+.skeleton-line { height: 14px; width: min(420px, 85%); }
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+.skeleton-card { height: 132px; border-radius: var(--radius-md); }
+/* The sheen is the only thing saying "still working" rather than "empty",
+   so it degrades to a plain block rather than vanishing entirely. */
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--surface), transparent);
+  opacity: 0.55;
+  animation: skeleton-sheen 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-sheen {
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after { animation: none; opacity: 0; }
+}

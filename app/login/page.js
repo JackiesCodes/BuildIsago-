@@ -4,7 +4,6 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { withinRateLimit } from '@/lib/utils/rateLimit';
 import PasswordInput from '@/components/PasswordInput';
 
 export default function LoginPage() {
@@ -29,13 +28,6 @@ function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
-
-    const allowed = await withinRateLimit(supabase, `login:${email.trim().toLowerCase()}`, 8, 15);
-    if (!allowed) {
-      setLoading(false);
-      setError('Too many attempts. Please wait a few minutes and try again.');
-      return;
-    }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 

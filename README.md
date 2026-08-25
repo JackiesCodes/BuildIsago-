@@ -93,7 +93,7 @@ every client's projects instead of just your own.
 Clients can click "Generate AI First Draft" on any project to get an
 instant starting point (a tech scope for software, a brand direction for
 branding, a creative direction for design) before a human looks at it. This
-calls the Claude API (`claude-opus-4-8`) server-side and costs a small
+calls the Claude API (`claude-opus-5`) server-side and costs a small
 amount per generation — see [pricing](https://claude.com/pricing). To use a
 cheaper/faster model instead, change the `model` value in
 `lib/actions/ai-draft.js`.

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { withinRateLimit } from '@/lib/utils/rateLimit';
 import PasswordInput from '@/components/PasswordInput';
 
 export default function SignupPage() {
@@ -23,13 +22,6 @@ export default function SignupPage() {
     setLoading(true);
 
     const supabase = createClient();
-
-    const allowed = await withinRateLimit(supabase, `signup:${email.trim().toLowerCase()}`, 5, 60);
-    if (!allowed) {
-      setLoading(false);
-      setError('Too many attempts. Please wait a while and try again.');
-      return;
-    }
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,

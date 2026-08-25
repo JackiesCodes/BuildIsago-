@@ -2232,8 +2232,12 @@ revoke execute on function public.log_audit_event(text, text, text, jsonb) from 
 grant execute on function public.log_audit_event(text, text, text, jsonb) to authenticated, service_role;
 revoke execute on function public.next_invoice_number() from public, anon, authenticated;
 grant execute on function public.next_invoice_number() to authenticated, service_role;
-revoke execute on function public.is_studio() from public, anon, authenticated;
-grant execute on function public.is_studio() to authenticated, service_role;
+-- is_studio() keeps anon EXECUTE: the public-bucket storage policies call
+-- it, and a policy anon can reach has to be evaluable by anon or the check
+-- raises instead of returning false. It leaks nothing — for a logged-out
+-- caller it is always false.
+revoke execute on function public.is_studio() from public;
+grant execute on function public.is_studio() to anon, authenticated, service_role;
 revoke execute on function public.is_studio_owner() from public, anon, authenticated;
 grant execute on function public.is_studio_owner() to authenticated, service_role;
 revoke execute on function public.join_marketplace_as_talent() from public, anon, authenticated;
