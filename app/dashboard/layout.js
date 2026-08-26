@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
 import { NAV_PROJECT_LIMIT } from '@/lib/constants/nav';
-import { isSelfServe } from '@/lib/engagement';
 import { signOut } from '@/lib/actions/auth';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
@@ -39,7 +38,6 @@ export default async function DashboardLayout({ children }) {
 
   const navProjects = (navProjectRows || []).slice(0, NAV_PROJECT_LIMIT);
   const hasMoreProjects = (navProjectRows || []).length > NAV_PROJECT_LIMIT;
-  const selfServe = isSelfServe(profile);
 
   return (
     <div className="app-shell">
@@ -51,7 +49,6 @@ export default async function DashboardLayout({ children }) {
         signOutAction={signOut}
         projects={navProjects}
         hasMoreProjects={hasMoreProjects}
-        selfServe={selfServe}
       />
       <MobileNav
         role={role}
@@ -61,7 +58,6 @@ export default async function DashboardLayout({ children }) {
         signOutAction={signOut}
         projects={navProjects}
         hasMoreProjects={hasMoreProjects}
-        selfServe={selfServe}
       />
       <div className="app-body">
         {/* No top bar: search was the only thing in it, and it now lives

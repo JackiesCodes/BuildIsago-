@@ -8,7 +8,7 @@ import ProfileMenu from './ProfileMenu';
 import NavProjectsDisclosure from './NavProjectsDisclosure';
 import { activeNavHref } from '@/lib/nav';
 
-export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false, selfServe = false }) {
+export default function Sidebar({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false }) {
   const pathname = usePathname();
   const navItems = NAV[role] || NAV.client;
 
@@ -28,10 +28,10 @@ export default function Sidebar({ role, name, email, homeHref, signOutAction, pr
         </span>
       </Link>
 
-      {/* Self-serve picks a discipline on the dashboard, which opens a
-          studio directly; only managed clients go via the brief form. */}
+      {/* Home is where the five service cards are, and each one creates
+          and opens its tool. There is no brief form to send anyone to. */}
       {role === 'client' && (
-        <Link href={selfServe ? '/dashboard/client' : '/dashboard/client/new'} className="sidebar-cta">
+        <Link href="/dashboard/client" className="sidebar-cta">
           <IconPlus />
           <span>New Project</span>
         </Link>

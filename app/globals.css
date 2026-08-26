@@ -995,7 +995,9 @@ input[type='color']:focus-visible {
 .greeting p { color: var(--muted); margin: 0; font-size: 1.08rem; }
 
 /* Quick-start service cards */
-.quick-start-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(12px, 2vh, 20px); }
+/* Five services, so five columns — a 4-wide grid left Creative Media
+   stranded on a row of its own. */
+.quick-start-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(10px, 1.6vh, 18px); }
 /* Renders as an <a> for managed accounts and a <button> for self-serve
    (one navigates, the other creates), so the resets below keep both
    looking identical. */
@@ -2337,6 +2339,9 @@ input[type='color']:focus-visible {
 .course-video-embed iframe { width: 100%; height: 100%; border: none; display: block; }
 
 @media (max-width: 1000px) {
+  /* Five across stops being readable here; 3 + 2 beats 5 slivers. */
+  .quick-start-grid { grid-template-columns: repeat(3, 1fr); }
+
   .devscope-repo-columns { grid-template-columns: 1fr; }
   /* Name and description stack rather than fighting for a 34/66 split. */
   .scope-pair-fields { flex-direction: column; align-items: stretch; gap: 2px; }
@@ -2385,7 +2390,9 @@ input[type='color']:focus-visible {
   .sidebar .nav-disclosure-chevron,
   .sidebar .nav-project-list { display: none; }
   .sidebar-user { justify-content: center; }
-  .quick-start-grid { grid-template-columns: 1fr 1fr; }
+  /* 3 + 2 rather than 2 + 2 + 1 — five cards in two columns is three
+     rows of full-height cards, which no longer fits a short window. */
+  .quick-start-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 640px) {

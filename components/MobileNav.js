@@ -15,7 +15,7 @@ const THEMES = [
   { value: 'system', label: 'System' },
 ];
 
-export default function MobileNav({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false, selfServe = false }) {
+export default function MobileNav({ role, name, email, homeHref, signOutAction, projects = [], hasMoreProjects = false }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pref, setPref] = useState(null);
@@ -83,7 +83,7 @@ export default function MobileNav({ role, name, email, homeHref, signOutAction, 
 
         {role === 'client' && (
           <Link
-            href={selfServe ? '/dashboard/client' : '/dashboard/client/new'}
+            href="/dashboard/client"
             className="mobile-bar-cta"
             aria-label="New project"
           >

@@ -1,61 +1,14 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import { useActionState } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { createProject } from '@/lib/actions/projects';
-import { SERVICES } from '@/lib/constants/services';
-
-const initialState = { error: null };
-
-export default function NewProjectPage() {
-  const [state, formAction, pending] = useActionState(createProject, initialState);
-  const searchParams = useSearchParams();
-  const requestedService = searchParams.get('service');
-  const defaultService = SERVICES.some((s) => s.value === requestedService)
-    ? requestedService
-    : SERVICES[0].value;
-
-  return (
-    <>
-      <Link href="/dashboard/client" className="back-link">&larr; Back to projects</Link>
-      <div className="page-head">
-        <div>
-          <h1>Start a new project</h1>
-          <p>Tell us what you need — we&apos;ll follow up with next steps.</p>
-        </div>
-      </div>
-
-      <div className="card" style={{ maxWidth: 560 }}>
-        {state?.error && <div className="form-error">{state.error}</div>}
-        <form action={formAction}>
-          <div className="field">
-            <label htmlFor="title">Project title</label>
-            <input id="title" name="title" type="text" required placeholder="e.g. New brand identity" />
-          </div>
-          <div className="field">
-            <label htmlFor="service_type">Service</label>
-            <select id="service_type" name="service_type" defaultValue={defaultService} required>
-              {SERVICES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="description">Project details</label>
-            <textarea id="description" name="description" rows={5} required placeholder="Goals, timeline, anything we should know…" />
-          </div>
-          <div className="field">
-            <label htmlFor="due_date">Target date (optional)</label>
-            <input id="due_date" name="due_date" type="date" />
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={pending}>
-            {pending ? 'Submitting…' : 'Submit project'}
-          </button>
-        </form>
-      </div>
-    </>
-  );
+/**
+ * The brief form is retired. It existed so a managed client could describe
+ * work for the studio to pick up; the portal is self-service now, and the
+ * five service cards on the home page create and open the work directly.
+ *
+ * Kept as a redirect rather than deleted: this URL is in old emails, in
+ * notifications, and was the sidebar's "New Project" target for months.
+ * A 404 for those is worse than landing on the place that replaced it.
+ */
+export default function NewProjectRedirect() {
+  redirect('/dashboard/client');
 }

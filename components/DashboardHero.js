@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { SERVICES } from '@/lib/constants/services';
 import { startSelfServeProject } from '@/lib/actions/startProject';
 import { IconArrowRight, IconChevronDown, IconSparkles } from './icons';
@@ -11,12 +10,10 @@ import { IconArrowRight, IconChevronDown, IconSparkles } from './icons';
  * type becomes the project's name, which is also why self-serve projects
  * stopped being called "Untitled branding".
  *
- * Self-serve creates the project and opens the matching studio.
- * Managed accounts brief the studio instead, so the same text is carried
- * into the brief form rather than silently dropped.
+ * It always creates and opens the tool. The branch that carried the text
+ * into a brief form for managed accounts is gone with the form itself.
  */
-export default function DashboardHero({ firstName, selfServe }) {
-  const router = useRouter();
+export default function DashboardHero({ firstName }) {
   const [value, setValue] = useState('');
   const [service, setService] = useState(SERVICES[0].value);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -48,13 +45,6 @@ export default function DashboardHero({ firstName, selfServe }) {
     const text = value.trim();
     if (!text || pending) return;
     setError(null);
-
-    if (!selfServe) {
-      router.push(
-        `/dashboard/client/new?service=${service}&title=${encodeURIComponent(text.slice(0, 120))}`
-      );
-      return;
-    }
 
     startTransition(async () => {
       const result = await startSelfServeProject(service, text);
@@ -135,7 +125,7 @@ export default function DashboardHero({ firstName, selfServe }) {
             type="submit"
             className="composer-send"
             disabled={pending || !value.trim()}
-            aria-label={selfServe ? 'Open studio' : 'Continue'}
+            aria-label="Open studio"
           >
             <IconArrowRight />
           </button>

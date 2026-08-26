@@ -26,7 +26,7 @@ export default function CommandPalette({ role, signOutAction }) {
         id: 'new-project',
         label: 'New Project',
         icon: IconPlus,
-        action: () => router.push('/dashboard/client/new'),
+        action: () => router.push('/dashboard/client'),
       });
     }
     extra.push({

@@ -1,142 +1,27 @@
+import { redirect, notFound } from 'next/navigation';
 import { getSessionProfile } from '@/lib/supabase/server';
-import MessageThread from '@/components/MessageThread';
-import FileUploader from '@/components/FileUploader';
-import MilestoneChecklist from '@/components/MilestoneChecklist';
-import AiDraftPanel from '@/components/AiDraftPanel';
-import DesignsList from '@/components/DesignsList';
-import { isSelfServe, showManagedSection } from '@/lib/engagement';
+import { serviceTool } from '@/lib/constants/services';
 
-export default async function ClientProjectDetail({ params, searchParams }) {
+/**
+ * A project has no overview any more — it opens the tool it is for.
+ *
+ * This used to be a page of messages, files, milestones and an AI draft:
+ * the machinery of asking someone else to do the work. In a self-service
+ * portal that is a lobby you have to walk through to reach the thing you
+ * came for. The route stays so existing links and bookmarks resolve
+ * instead of 404ing; it just forwards.
+ */
+export default async function ClientProjectDetail({ params }) {
   const { projectId } = await params;
-  const { setup } = await searchParams;
-  const { user, profile, supabase } = await getSessionProfile();
+  const { supabase } = await getSessionProfile();
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, description, ai_draft, ai_draft_generated_at')
+    .select('id, service_type')
     .eq('id', projectId)
     .single();
 
-  const { data: rawMessages } = await supabase
-    .from('messages')
-    .select('id, body, created_at, sender_id, profiles(full_name)')
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: true });
+  if (!project) notFound();
 
-  const messages = (rawMessages || []).map((m) => ({
-    ...m,
-    sender_name: m.profiles?.full_name || 'Studio',
-  }));
-
-  const { data: files } = await supabase
-    .from('project_files')
-    .select('id, file_name, storage_path, created_at')
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: false });
-
-  const filesWithUrls = await Promise.all(
-    (files || []).map(async (f) => {
-      const { data } = await supabase.storage
-        .from('project-files')
-        .createSignedUrl(f.storage_path, 3600);
-      return { ...f, url: data?.signedUrl };
-    })
-  );
-
-  const { data: milestones } = await supabase
-    .from('project_milestones')
-    .select('id, title, completed, position')
-    .eq('project_id', projectId)
-    .order('position', { ascending: true });
-
-  const { data: designs } = await supabase
-    .from('project_designs')
-    .select('id, title, width, height, updated_at')
-    .eq('project_id', projectId)
-    .order('updated_at', { ascending: false });
-
-  // Talking to the studio, the studio's milestones and the brief they
-  // work from only mean something when the studio is working this
-  // project. Each still appears the moment it has real content, so
-  // nothing the studio has already sent can go missing.
-  const selfServe = isSelfServe(profile);
-  const showConversation = showManagedSection(selfServe, messages.length);
-  const showProgress = showManagedSection(selfServe, milestones?.length);
-  const showAiDraft = showManagedSection(selfServe, project?.ai_draft);
-  const showBrief = Boolean(project?.description);
-  const showFiles = showManagedSection(selfServe, filesWithUrls.length);
-
-  return (
-    <>
-      {setup === 'partial' && (
-        <div className="form-error" style={{ marginBottom: 24 }}>
-          Your project was created, but we couldn&apos;t set up the milestone checklist
-          automatically. Send us a message below and we&apos;ll add it manually.
-        </div>
-      )}
-
-      {/* Without the conversation column this is a single column of
-          tools, so the two-column split would leave a large empty gap. */}
-      <div className={showConversation ? 'detail-grid' : ''}>
-        {showConversation && (
-          <div className="card">
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Conversation</h3>
-            <MessageThread projectId={projectId} messages={messages} currentUserId={user.id} />
-          </div>
-        )}
-
-        <div>
-          {showProgress && (
-            <div className="card" style={{ marginBottom: 20 }}>
-              <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Progress</h3>
-              <MilestoneChecklist projectId={projectId} milestones={milestones || []} editable={false} />
-            </div>
-          )}
-
-          {showAiDraft && (
-            <div className="card" style={{ marginBottom: 20 }}>
-              <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>AI First Draft</h3>
-              <AiDraftPanel projectId={projectId} draft={project?.ai_draft} generatedAt={project?.ai_draft_generated_at} />
-            </div>
-          )}
-
-          <div className="card" style={{ marginBottom: showBrief || showFiles ? 20 : 0 }}>
-            <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Designs</h3>
-            <DesignsList projectId={projectId} designs={designs || []} />
-          </div>
-
-          {(showBrief || showFiles) && (
-            <div className="card">
-              {showBrief && (
-                <>
-                  <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Brief</h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 22, whiteSpace: 'pre-wrap' }}>
-                    {project.description}
-                  </p>
-                </>
-              )}
-
-              {showFiles && (
-                <>
-                  <h3 style={{ marginBottom: 14, fontFamily: 'var(--font-display)' }}>Files</h3>
-                  <div className="file-list">
-                    {!filesWithUrls.length && (
-                      <p style={{ color: 'var(--muted-2)', fontSize: '0.85rem' }}>No files yet.</p>
-                    )}
-                    {filesWithUrls.map((f) => (
-                      <div key={f.id} className="file-row">
-                        <span>{f.file_name}</span>
-                        {f.url && <a href={f.url} target="_blank" rel="noreferrer">Download</a>}
-                      </div>
-                    ))}
-                  </div>
-                  <FileUploader projectId={projectId} />
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
+  redirect(`/dashboard/client/${projectId}/${serviceTool(project.service_type)}`);
 }
